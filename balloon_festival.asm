@@ -3178,16 +3178,21 @@ __d90f:     jsr __d246         ; $d90f: 20 46 d2
             jsr __c10a         ; $d912: 20 0a c1  
             jsr __f465         ; $d915: 20 65 f4  
             jsr __c0fa         ; $d918: 20 fa c0  
-            lda #$2c           ; $d91b: a9 2c     
+            lda #<titleScreenNameTablePtr           ; $d91b: a9 2c     
             sta $1d            ; $d91d: 85 1d     
-            lda #$d9           ; $d91f: a9 d9     
+            lda #>titleScreenNameTablePtr           ; $d91f: a9 d9     
             sta $1e            ; $d921: 85 1e     
             jsr __d497         ; $d923: 20 97 d4  
             jsr __c104         ; $d926: 20 04 c1  
             jmp __c115         ; $d929: 4c 15 c1  
 
-;-------------------------------------------------------------------------------
-            .hex 30 d9 00 00   ; $d92c: 30 d9 00 00   Data
+titleScreenNameTablePtr:
+	.db <titleScreenNameTable
+	.db >titleScreenNameTable
+	.db 0
+	.db 0
+
+titleScreenNameTable:
             .hex 3f 00 04 0f   ; $d930: 3f 00 04 0f   Data
             .hex 30 27 2a 3f   ; $d934: 30 27 2a 3f   Data
             .hex 18 04 0f 16   ; $d938: 18 04 0f 16   Data
@@ -6678,8 +6683,8 @@ __f952:     lda #$0f           ; $f952: a9 0f
             and #$0f           ; $f959: 29 0f     
             ora #$40           ; $f95b: 09 40     
             sta $f4            ; $f95d: 85 f4     
-            ldx #$d1           ; $f95f: a2 d1     
-            ldy #$f9           ; $f961: a0 f9     
+            ldx #<data_f9d1           ; $f95f: a2 d1     
+            ldy #>data_f9d1           ; $f961: a0 f9     
             bne __f98f         ; $f963: d0 2a     
 __f965:     lda #$02           ; $f965: a9 02     
             sta $f0            ; $f967: 85 f0     
@@ -6687,8 +6692,8 @@ __f965:     lda #$02           ; $f965: a9 02
             and #$0f           ; $f96b: 29 0f     
             ora #$20           ; $f96d: 09 20     
             sta $f4            ; $f96f: 85 f4     
-            ldx #$cd           ; $f971: a2 cd     
-            ldy #$f9           ; $f973: a0 f9     
+            ldx #<data_f9cd           ; $f971: a2 cd     
+            ldy #>data_f9cd           ; $f973: a0 f9     
             bne __f98f         ; $f975: d0 18     
 __f977:     lda #$00           ; $f977: a9 00     
             sta $07fc          ; $f979: 8d fc 07  
@@ -6696,8 +6701,8 @@ __f977:     lda #$00           ; $f977: a9 00
             and #$00           ; $f97e: 29 00     
             ora #$40           ; $f980: 09 40     
             sta $f7            ; $f982: 85 f7     
-            ldx #$d5           ; $f984: a2 d5     
-            ldy #$f9           ; $f986: a0 f9     
+            ldx #<data_f9d5           ; $f984: a2 d5     
+            ldy #>data_f9d5           ; $f986: a0 f9     
             jsr __f68f         ; $f988: 20 8f f6  
             ldx #$d9           ; $f98b: a2 d9     
             ldy #$f9           ; $f98d: a0 f9     
@@ -6734,13 +6739,13 @@ __f9bd:     lda $07fd          ; $f9bd: ad fd 07
 __f9ca:     jmp __f8ca         ; $f9ca: 4c ca f8  
 
 ;-------------------------------------------------------------------------------
-            .hex b8 d5 20 00   ; $f9cd: b8 d5 20 00   Data
-            .hex 9f 93 80 22   ; $f9d1: 9f 93 80 22   Data
-            .hex 3f ba e0 06   ; $f9d5: 3f ba e0 06   Data
-            .hex 3f bb ce 06   ; $f9d9: 3f bb ce 06   Data
-            .hex b8 93 50 02   ; $f9dd: b8 93 50 02   Data
-            .hex 80 7f 60 68   ; $f9e1: 80 7f 60 68   Data
-            .hex 80 7f 62 68   ; $f9e5: 80 7f 62 68   Data
+data_f9cd:            .hex b8 d5 20 00   ; $f9cd: b8 d5 20 00   Data
+data_f9d1:            .hex 9f 93 80 22   ; $f9d1: 9f 93 80 22   Data
+data_f9d5:            .hex 3f ba e0 06   ; $f9d5: 3f ba e0 06   Data
+data_f9d9:            .hex 3f bb ce 06   ; $f9d9: 3f bb ce 06   Data
+data_f9dd:            .hex b8 93 50 02   ; $f9dd: b8 93 50 02   Data
+data_f9e1:            .hex 80 7f 60 68   ; $f9e1: 80 7f 60 68   Data
+data_f9e5:            .hex 80 7f 62 68   ; $f9e5: 80 7f 62 68   Data
 
 ;-------------------------------------------------------------------------------
 __f9e9:     lda $f5            ; $f9e9: a5 f5     
@@ -6816,8 +6821,8 @@ __fa64:     lda $f6            ; $fa64: a5 f6
             lda $f5            ; $fa68: a5 f5     
             and #$02           ; $fa6a: 29 02     
             bne __fa63         ; $fa6c: d0 f5     
-            ldx #$8a           ; $fa6e: a2 8a     
-            ldy #$fa           ; $fa70: a0 fa     
+            ldx #<data_fa8a           ; $fa6e: a2 8a     
+            ldy #>data_fa8a           ; $fa70: a0 fa     
             jsr __f68f         ; $fa72: 20 8f f6  
             lda $1b            ; $fa75: a5 1b     
             and #$3f           ; $fa77: 29 3f     
@@ -6834,6 +6839,7 @@ __fa83:     ldy #$0a           ; $fa83: a0 0a
             lda #$ef           ; $fa85: a9 ef     
             jmp __fba5         ; $fa87: 4c a5 fb  
 
+data_fa8a:
 ;-------------------------------------------------------------------------------
             .hex d9 86 a8 48   ; $fa8a: d9 86 a8 48   Data
             .hex 08 7f 40 28   ; $fa8e: 08 7f 40 28   Data
@@ -7271,14 +7277,13 @@ __fbca:     .hex 0b 14 1d 26   ; $fbca: 0b 14 1d 26   Data
             .hex 02 56 56 56   ; $ffe6: 02 56 56 56   Data
             .hex 02 56 02 85   ; $ffea: 02 56 02 85   Data
             .hex 54 c4 85 0c   ; $ffee: 54 c4 85 0c   Data
-            .hex ff ff ff ff   ; $fff2: ff ff ff ff   Data
-            .hex ff            ; $fff6: ff            Data
 
 ;-------------------------------------------------------------------------------
 __fff7:     jmp __f758         ; $fff7: 4c 58 f7  
 
 ;-------------------------------------------------------------------------------
 
+.org $FFFA
 ;-------------------------------------------------------------------------------
 ; Vector Table
 ;-------------------------------------------------------------------------------
