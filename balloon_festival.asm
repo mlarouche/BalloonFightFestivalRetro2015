@@ -247,6 +247,12 @@ NewTitlescreen:
     ; EOD
     .hex 00
 
+NewTitleScreenCursorOptionY:
+    .hex 8c 9c ac bc
+    
+NextOptionSelection:
+    .hex 01 02 03 00
+
 ;-------------------------------------------------------------------------------
 ; Program Origin
 ;-------------------------------------------------------------------------------
@@ -3562,7 +3568,7 @@ __dacb:     jsr WaitForNMI                               ; $dacb: 20 65 f4
             lda #$00                                 ; $dae2: a9 00     
             sta GameTimer                            ; $dae4: 85 19     
             ldx GameMode                             ; $dae6: a6 3f     
-            lda __db05,x                             ; $dae8: bd 05 db  
+            lda NextOptionSelection,x
             sta GameMode                             ; $daeb: 85 3f     
 __daed:     jmp __dacb                               ; $daed: 4c cb da  
 
@@ -3589,7 +3595,7 @@ __db08:     lda GameMode                             ; $db08: a5 3f
             tax                                      ; $db0f: aa        
             and #$01                                 ; $db10: 29 01     
             sta NumberOfPlayers                      ; $db12: 85 40     
-            lda TitleScreenCursorOptionY,x           ; $db14: bd 27 db  
+            lda NewTitleScreenCursorOptionY,x           ; $db14: bd 27 db  
             sta $057b                                ; $db17: 8d 7b 05  
             lda #$2c                                 ; $db1a: a9 2c     
             sta $0567                                ; $db1c: 8d 67 05  
