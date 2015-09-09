@@ -5,6 +5,7 @@
 ;-------------------------------------------------------------------------------
 ; User Defined Labels
 ;-------------------------------------------------------------------------------
+PpuControlBackup = $00
 BytesLeftToLoad      = $12
 GameTimer            = $19
 LoadPointerLow       = $1d
@@ -58,7 +59,7 @@ Player2BonusBalloon  = $05ce
 ; iNES Header
 ;-------------------------------------------------------------------------------
             .db "NES", $1A                           ; Header
-            .db 1                                    ; 1 x 16k PRG banks
+            .db 2                                    ; 1 x 16k PRG banks
             .db 1                                    ; 1 x 8k CHR banks
             .db %00000000                            ; Mirroring: Horizontal
                                                      ; SRAM: Not used
@@ -68,6 +69,183 @@ Player2BonusBalloon  = $05ce
             .db %00000000                            ; RomType: NES
             .hex 00 00 00 00                         ; iNES Tail 
             .hex 00 00 00 00                          
+
+;-------------------------------------------------------------------------------
+; Hack code and data
+;-------------------------------------------------------------------------------
+			.org $8000
+
+NewTitlescreenPtr:
+    .db <NewTitlescreen
+    .db >NewTitlescreen
+    
+NewTitlescreen:
+    ; background palette 0
+    .hex 3f 00 04 0f 30 27 2a
+    ; sprite palette 2
+    .hex 3f 18 04 0f 16 30 21
+
+    .hex 20 7c 21
+    .hex f0 f1 24 24 24 24 e0 e1 e1 e2 e0 e1 e1 e2 e0 e2
+    .hex 24 e0 e2 24 e0 e1 e1 e2 e0 e1 e1 e2 e0 ec 24 e0
+    .hex e2
+
+    .hex 20 a2 1b
+    .hex e3 e3 e3
+    .hex e5 e3 e3 e3
+    .hex e5 e3 e5 24
+    .hex e3 e5 24 e3
+    .hex e3 e3 e5 e3
+    .hex e3 e3 e5 e3
+    .hex e3 f3 e3 e5
+
+    .hex 20 c2 1b
+    .hex e3
+    .hex e4 e3 e7 e3
+    .hex e4 e3 e5 e3
+    .hex e5 24 e3 e5
+    .hex 24 e3 e4 e3
+    .hex e5 e3 e4 e3
+    .hex e5 e3 e3 e3
+    .hex e3 e5
+    
+    .hex 20 e2 1b
+    .hex e3 e3 e3
+    .hex e2 e3 e3 e3
+    .hex e5 e3 e5 24
+    .hex e3 e5 24 e3
+    .hex e3 e3 e5 e3
+    .hex e3 e3 e5 e3
+    .hex e3 e3 e3 e5
+
+    .hex 21 02 1b
+    .hex e3
+    .hex e4 e3 e5 e3
+    .hex f2 e3 e5 e3
+    .hex e3 e2 e3 e3
+    .hex e2 e3 e3 e3
+    .hex e5 e3 e3 e3
+    .hex e5 e3 f2 e3
+    .hex e3 e5
+    
+    .hex 21 22 1b
+    .hex e6 e3 e3
+    .hex e7 eb 24 e6
+    .hex e7 e6 e3 e7
+    .hex e6 e3 e7 e6
+    .hex e3 e3 e7 e6
+    .hex e3 e3 e7 eb
+    .hex 24 e6 e3 e7
+    
+    .hex 21 4c 12
+    .hex e0
+    .hex e1 e1 e2 e0
+    .hex e2 e0 e1 e1
+    .hex e2 e8 24 e0
+    .hex e2 e0 e1 e1
+    .hex e2
+    
+    .hex 21 6c 12
+    .hex e3 e3 e3 e7
+    .hex e3 e5 e3 f5
+    .hex f6 e7 e3 f3
+    .hex e3 e5 e6 e3
+    .hex e3 e7
+    
+    .hex 21 8c 12
+    .hex e3 e3 ef
+    .hex 24 e3 e5 e3
+    .hex 24 24 24 e3
+    .hex e3 e3 e5 24
+    .hex e3 e5 24 
+    
+    .hex 21 ac 12
+    .hex e3 e3
+    .hex e1 ea e3 e5
+    .hex e3 e9 e3 e2
+    .hex e3 e3 e3 e5
+    .hex 24 e3 e5 24
+    
+    .hex 21 cc 12
+    .hex e3
+    .hex e3 ef 24 e3
+    .hex e5 e3 f3 e3
+    .hex e5 e3 f2 e3
+    .hex e5 24 e3 e5
+    .hex 24
+    
+    .hex 21 ec 12
+    .hex e6 e7 24 24
+    .hex e6 e7 e6 e7
+    .hex e6 e7 eb 24
+    .hex e6 e7 24 e6
+    .hex e7 24 
+    
+    ; HOMMAGE A
+    .hex 21 82 09
+    .db "HOMMAGE"-$37
+    .hex 24
+    .db "A"-$37
+    
+    ; SATORU
+    .hex 21 A2 09
+    .hex 24 24 24
+    .db "SATORU"-$37
+    
+    ; IWATA
+    .hex 21 C2 09
+    .hex 24 24 24 24
+    .db "IWATA"-$37
+    
+    ; First choice
+    .hex 22 48 11
+    .db "A"-$37
+    .hex 24 24
+    .db "PARTIE"-$37
+    .hex 24
+    .db "1"-"0"
+    .hex 24
+    .db "IWATA"-$37
+    
+    ; Second choice
+    .hex 22 88 11
+    .db "B"-$37
+    .hex 24 24
+    .db "PARTIE"-$37
+    .hex 24
+    .db "2"-"0"
+    .hex 24
+    .db "IWATA"-$37
+    
+    ; Third choice
+    .hex 22 c8 10
+    .db "C"-$37
+    .hex 24 24
+    .db "VOYAGE"-$37
+    .hex 24
+    .db "BALLON"-$37
+    
+    ; Fourth choice (ze competition)
+    .hex 23 08 0e
+    .db "D"-$37
+    .hex 24 24
+    .db "COMPETITION"-$37
+    
+    ; Copyright 1984 Nintendo
+    .hex 23 49 0e
+    .hex f4 01 09 08 04 24 17 12 17 1d 0e 17 0d 18
+    
+    ; Copyright retrogamer.ca
+    .hex 23 66 13
+    .hex f4
+    .db "2015"-"0"
+    .hex 24
+    .db "RETROGAMER"-$37
+    .db "."-8
+    .db "CA"-$37
+    
+    ; EOD
+    .hex 00
 
 ;-------------------------------------------------------------------------------
 ; Program Origin
@@ -139,7 +317,7 @@ __c06e:     lda __c082,x                             ; $c06e: bd 82 c0
 __c077:     lda #$1e                                 ; $c077: a9 1e     
             sta $01                                  ; $c079: 85 01     
             lda #$90                                 ; $c07b: a9 90     
-            sta $00                                  ; $c07d: 85 00     
+            sta PpuControlBackup                                  ; $c07d: 85 00     
             jmp __f1d4                               ; $c07f: 4c d4 f1  
 
 ;-------------------------------------------------------------------------------
@@ -189,7 +367,7 @@ __c0da:     dey                                      ; $c0da: 88
             dex                                      ; $c0dd: ca        
             bne __c0da                               ; $c0de: d0 fa     
             lda $18                                  ; $c0e0: a5 18     
-            ora $00                                  ; $c0e2: 05 00     
+            ora PpuControlBackup                                  ; $c0e2: 05 00     
             sta $2000                                ; $c0e4: 8d 00 20  
             lda $17                                  ; $c0e7: a5 17     
             sta $2005                                ; $c0e9: 8d 05 20  
@@ -208,26 +386,32 @@ __c0f1:     pla                                      ; $c0f1: 68
 irq:        jmp irq                                  ; $c0f7: 4c f7 c0  
 
 ;-------------------------------------------------------------------------------
-__c0fa:     lda $00                                  ; $c0fa: a5 00     
+DisableNMI:
+            lda PpuControlBackup                                  ; $c0fa: a5 00     
             and #$7f                                 ; $c0fc: 29 7f     
-__c0fe:     sta $2000                                ; $c0fe: 8d 00 20  
-            sta $00                                  ; $c101: 85 00     
+SetPpuControl:
+            sta $2000                                ; $c0fe: 8d 00 20  
+            sta PpuControlBackup                                  ; $c101: 85 00     
             rts                                      ; $c103: 60        
 
 ;-------------------------------------------------------------------------------
-__c104:     lda $00                                  ; $c104: a5 00     
+EnableNMI:
+            lda PpuControlBackup                                  ; $c104: a5 00     
             ora #$80                                 ; $c106: 09 80     
-            bne __c0fe                               ; $c108: d0 f4     
-__c10a:     lda #$00                                 ; $c10a: a9 00     
-__c10c:     pha                                      ; $c10c: 48        
-            jsr __f465                               ; $c10d: 20 65 f4  
+            bne SetPpuControl                               ; $c108: d0 f4     
+HideEverything:
+            lda #$00                                 ; $c10a: a9 00     
+SetPpuMask:
+            pha                                      ; $c10c: 48        
+            jsr WaitForNMI                               ; $c10d: 20 65 f4  
             pla                                      ; $c110: 68        
             sta $2001                                ; $c111: 8d 01 20  
             rts                                      ; $c114: 60        
 
 ;-------------------------------------------------------------------------------
-__c115:     lda $01                                  ; $c115: a5 01     
-            bne __c10c                               ; $c117: d0 f3     
+ShowScreen:
+            lda $01                                  ; $c115: a5 01     
+            bne SetPpuMask                               ; $c117: d0 f3     
 __c119:     jsr __c154                               ; $c119: 20 54 c1  
             ldy #$00                                 ; $c11c: a0 00     
 __c11e:     lda $0057,y                              ; $c11e: b9 57 00  
@@ -559,7 +743,7 @@ __c378:     stx $0200                                ; $c378: 8e 00 02
 __c3a1:     jsr __c579                               ; $c3a1: 20 79 c5  
             lda #$01                                 ; $c3a4: a9 01     
             sta $f0                                  ; $c3a6: 85 f0     
-            jsr __f465                               ; $c3a8: 20 65 f4  
+            jsr WaitForNMI                               ; $c3a8: 20 65 f4  
             lda #$02                                 ; $c3ab: a9 02     
             sta CurrentMusic                         ; $c3ad: 85 f2     
             jmp __f36a                               ; $c3af: 4c 6a f3  
@@ -2009,7 +2193,7 @@ __cf51:     lda $055d,x                              ; $cf51: bd 5d 05
             bpl __cf51                               ; $cf57: 10 f8     
             lda GameTimer                            ; $cf59: a5 19     
             bne __cf34                               ; $cf5b: d0 d7     
-            jsr __d246                               ; $cf5d: 20 46 d2  
+            jsr ClearScreenAndSprites                               ; $cf5d: 20 46 d2  
             ldx #$02                                 ; $cf60: a2 02     
             stx $46                                  ; $cf62: 86 46     
             jsr __f45e                               ; $cf64: 20 5e f4  
@@ -2112,7 +2296,7 @@ __d02e:     jsr __ce2f                               ; $d02e: 20 2f ce
             lda #$70                                 ; $d043: a9 70     
             ldy #$d1                                 ; $d045: a0 d1     
             jsr __c131                               ; $d047: 20 31 c1  
-            jsr __f465                               ; $d04a: 20 65 f4  
+            jsr WaitForNMI                               ; $d04a: 20 65 f4  
             ldx #$1a                                 ; $d04d: a2 1a     
 __d04f:     lda __d184,x                             ; $d04f: bd 84 d1  
             sta $57,x                                ; $d052: 95 57     
@@ -2353,16 +2537,17 @@ __d238:     dec $59,x                                ; $d238: d6 59
 __d243:     jmp __d1fe                               ; $d243: 4c fe d1  
 
 ;-------------------------------------------------------------------------------
-__d246:     jsr __c10a                               ; $d246: 20 0a c1  
-            jsr __c0fa                               ; $d249: 20 fa c0  
+ClearScreenAndSprites:
+            jsr HideEverything                               ; $d246: 20 0a c1  
+            jsr DisableNMI                               ; $d249: 20 fa c0  
             lda #$20                                 ; $d24c: a9 20     
             sta $2006                                ; $d24e: 8d 06 20  
             lda #$00                                 ; $d251: a9 00     
             sta $2006                                ; $d253: 8d 06 20  
             jsr __d275                               ; $d256: 20 75 d2  
             jsr __d275                               ; $d259: 20 75 d2  
-            jsr __c104                               ; $d25c: 20 04 c1  
-            jsr __c115                               ; $d25f: 20 15 c1  
+            jsr EnableNMI                               ; $d25c: 20 04 c1  
+            jsr ShowScreen                               ; $d25f: 20 15 c1  
             ldx #$3f                                 ; $d262: a2 3f     
             ldy #$00                                 ; $d264: a0 00     
             sty $4c                                  ; $d266: 84 4c     
@@ -2393,8 +2578,8 @@ __d28c:     sta $2007                                ; $d28c: 8d 07 20
             rts                                      ; $d292: 60        
 
 ;-------------------------------------------------------------------------------
-__d293:     jsr __c10a                               ; $d293: 20 0a c1  
-            jsr __c0fa                               ; $d296: 20 fa c0  
+__d293:     jsr HideEverything                               ; $d293: 20 0a c1  
+            jsr DisableNMI                               ; $d296: 20 fa c0  
             lda $16                                  ; $d299: a5 16     
             beq __d2a0                               ; $d29b: f0 03     
             jmp __d572                               ; $d29d: 4c 72 d5  
@@ -2405,13 +2590,13 @@ __d2a0:     ldy CurrentLevelHeaderPtr                ; $d2a0: a4 3b
             sta LoadPointerLow                       ; $d2a5: 85 1d     
             lda LevelHeaderPointerHigh,y             ; $d2a7: b9 3a db  
             sta LoadPointerHigh                      ; $d2aa: 85 1e     
-            jsr __d497                               ; $d2ac: 20 97 d4  
+            jsr LoadNametable                               ; $d2ac: 20 97 d4  
             ldx #$00                                 ; $d2af: a2 00     
-__d2b1:     jsr __d4e5                               ; $d2b1: 20 e5 d4  
+__d2b1:     jsr DerefLoadPointer                               ; $d2b1: 20 e5 d4  
             cmp #$ff                                 ; $d2b4: c9 ff     
             beq __d322                               ; $d2b6: f0 6a     
             sta CloudGfxX                            ; $d2b8: 85 54     
-            jsr __d4e5                               ; $d2ba: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d2ba: 20 e5 d4  
             sta CloudGfxY                            ; $d2bd: 85 55     
             ldy #$03                                 ; $d2bf: a0 03     
 __d2c1:     jsr __d4fb                               ; $d2c1: 20 fb d4  
@@ -2468,13 +2653,13 @@ __d2cb:     sta $2007                                ; $d2cb: 8d 07 20
 __d322:     dex                                      ; $d322: ca        
             stx $a3                                  ; $d323: 86 a3     
             ldx #$00                                 ; $d325: a2 00     
-__d327:     jsr __d4e5                               ; $d327: 20 e5 d4  
+__d327:     jsr DerefLoadPointer                               ; $d327: 20 e5 d4  
             cmp #$ff                                 ; $d32a: c9 ff     
             beq __d37e                               ; $d32c: f0 50     
             sta CloudGfxX                            ; $d32e: 85 54     
-            jsr __d4e5                               ; $d330: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d330: 20 e5 d4  
             sta CloudGfxY                            ; $d333: 85 55     
-            jsr __d4e5                               ; $d335: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d335: 20 e5 d4  
             sta $05fa,x                              ; $d338: 9d fa 05  
             lda CloudGfxX                            ; $d33b: a5 54     
             asl                                      ; $d33d: 0a        
@@ -2511,9 +2696,9 @@ __d327:     jsr __d4e5                               ; $d327: 20 e5 d4
 ;-------------------------------------------------------------------------------
 __d37e:     dex                                      ; $d37e: ca        
             stx $05d1                                ; $d37f: 8e d1 05  
-            jsr __d4e5                               ; $d382: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d382: 20 e5 d4  
             sta GfxPointerLow                        ; $d385: 85 1f     
-            jsr __d4e5                               ; $d387: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d387: 20 e5 d4  
             sta GfxPointerHigh                       ; $d38a: 85 20     
             ldy #$00                                 ; $d38c: a0 00     
             lda (GfxPointerLow),y                    ; $d38e: b1 1f     
@@ -2542,11 +2727,11 @@ __d39a:     lda (GfxPointerLow),y                    ; $d39a: b1 1f
             sta $0441,x                              ; $d3b4: 9d 41 04  
             dex                                      ; $d3b7: ca        
             bpl __d39a                               ; $d3b8: 10 e0     
-__d3ba:     jsr __d4e5                               ; $d3ba: 20 e5 d4  
+__d3ba:     jsr DerefLoadPointer                               ; $d3ba: 20 e5 d4  
             sta PlatformCount                        ; $d3bd: 85 cd     
-            jsr __d4e5                               ; $d3bf: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d3bf: 20 e5 d4  
             sta PlatformLeftLow                      ; $d3c2: 85 23     
-            jsr __d4e5                               ; $d3c4: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d3c4: 20 e5 d4  
             tay                                      ; $d3c7: a8        
             sta PlatformLeftHigh                     ; $d3c8: 85 24     
             lda PlatformLeftLow                      ; $d3ca: a5 23     
@@ -2561,8 +2746,8 @@ __d3ba:     jsr __d4e5                               ; $d3ba: 20 e5 d4
             sty PlatformBottonHigh                   ; $d3df: 84 2a     
 __d3e1:     jsr __d5d9                               ; $d3e1: 20 d9 d5  
             jsr __d3ed                               ; $d3e4: 20 ed d3  
-            jsr __c104                               ; $d3e7: 20 04 c1  
-            jmp __c115                               ; $d3ea: 4c 15 c1  
+            jsr EnableNMI                               ; $d3e7: 20 04 c1  
+            jmp ShowScreen                               ; $d3ea: 4c 15 c1  
 
 ;-------------------------------------------------------------------------------
 __d3ed:     ldx #$22                                 ; $d3ed: a2 22     
@@ -2641,20 +2826,21 @@ __d492:     rts                                      ; $d492: 60
 __d493:     .hex 7f 7e 7d 7c                         ; $d493: 7f 7e 7d 7c   Data
 
 ;-------------------------------------------------------------------------------
-__d497:     jsr __d4e5                               ; $d497: 20 e5 d4  
+LoadNametable:
+            jsr DerefLoadPointer                               ; $d497: 20 e5 d4  
             sta GfxPointerLow                        ; $d49a: 85 1f     
-            jsr __d4e5                               ; $d49c: 20 e5 d4  
+            jsr DerefLoadPointer                               ; $d49c: 20 e5 d4  
             sta GfxPointerHigh                       ; $d49f: 85 20     
             tax                                      ; $d4a1: aa        
             beq __d4e4                               ; $d4a2: f0 40     
-__d4a4:     jsr __d4f0                               ; $d4a4: 20 f0 d4  
+__d4a4:     jsr DerefGfxPointer                               ; $d4a4: 20 f0 d4  
             tax                                      ; $d4a7: aa        
-            beq __d497                               ; $d4a8: f0 ed     
+            beq LoadNametable                               ; $d4a8: f0 ed     
             and #$7f                                 ; $d4aa: 29 7f     
             sta $2006                                ; $d4ac: 8d 06 20  
-            jsr __d4f0                               ; $d4af: 20 f0 d4  
+            jsr DerefGfxPointer                               ; $d4af: 20 f0 d4  
             sta $2006                                ; $d4b2: 8d 06 20  
-            jsr __d4f0                               ; $d4b5: 20 f0 d4  
+            jsr DerefGfxPointer                               ; $d4b5: 20 f0 d4  
             sta BytesLeftToLoad                      ; $d4b8: 85 12     
             txa                                      ; $d4ba: 8a        
             and #$80                                 ; $d4bb: 29 80     
@@ -2663,17 +2849,17 @@ __d4a4:     jsr __d4f0                               ; $d4a4: 20 f0 d4
             lsr                                      ; $d4bf: 4a        
             lsr                                      ; $d4c0: 4a        
             lsr                                      ; $d4c1: 4a        
-            ora $00                                  ; $d4c2: 05 00     
+            ora PpuControlBackup                                  ; $d4c2: 05 00     
             sta $2000                                ; $d4c4: 8d 00 20  
             txa                                      ; $d4c7: 8a        
             and #$40                                 ; $d4c8: 29 40     
             bne __d4d8                               ; $d4ca: d0 0c     
-__d4cc:     jsr __d4f0                               ; $d4cc: 20 f0 d4  
+__d4cc:     jsr DerefGfxPointer                               ; $d4cc: 20 f0 d4  
             sta $2007                                ; $d4cf: 8d 07 20  
             dec BytesLeftToLoad                      ; $d4d2: c6 12     
             bne __d4cc                               ; $d4d4: d0 f6     
             beq __d4a4                               ; $d4d6: f0 cc     
-__d4d8:     jsr __d4f0                               ; $d4d8: 20 f0 d4  
+__d4d8:     jsr DerefGfxPointer                               ; $d4d8: 20 f0 d4  
 __d4db:     sta $2007                                ; $d4db: 8d 07 20  
             dec BytesLeftToLoad                      ; $d4de: c6 12     
             bne __d4db                               ; $d4e0: d0 f9     
@@ -2681,7 +2867,8 @@ __d4db:     sta $2007                                ; $d4db: 8d 07 20
 __d4e4:     rts                                      ; $d4e4: 60        
 
 ;-------------------------------------------------------------------------------
-__d4e5:     ldy #$00                                 ; $d4e5: a0 00     
+DerefLoadPointer:
+            ldy #$00                                 ; $d4e5: a0 00     
             lda (LoadPointerLow),y                   ; $d4e7: b1 1d     
             inc LoadPointerLow                       ; $d4e9: e6 1d     
             bne __d4ef                               ; $d4eb: d0 02     
@@ -2689,7 +2876,7 @@ __d4e5:     ldy #$00                                 ; $d4e5: a0 00
 __d4ef:     rts                                      ; $d4ef: 60        
 
 ;-------------------------------------------------------------------------------
-__d4f0:     ldy #$00                                 ; $d4f0: a0 00     
+DerefGfxPointer:     ldy #$00                                 ; $d4f0: a0 00     
             lda (GfxPointerLow),y                    ; $d4f2: b1 1f     
             inc GfxPointerLow                        ; $d4f4: e6 1f     
             bne __d4fa                               ; $d4f6: d0 02     
@@ -3233,17 +3420,18 @@ __d901:     lda #$00                                 ; $d901: a9 00
             rts                                      ; $d90e: 60        
 
 ;-------------------------------------------------------------------------------
-__d90f:     jsr __d246                               ; $d90f: 20 46 d2  
-            jsr __c10a                               ; $d912: 20 0a c1  
-            jsr __f465                               ; $d915: 20 65 f4  
-            jsr __c0fa                               ; $d918: 20 fa c0  
-            lda #$2c                                 ; $d91b: a9 2c     
-            sta LoadPointerLow                       ; $d91d: 85 1d     
-            lda #$d9                                 ; $d91f: a9 d9     
-            sta LoadPointerHigh                      ; $d921: 85 1e     
-            jsr __d497                               ; $d923: 20 97 d4  
-            jsr __c104                               ; $d926: 20 04 c1  
-            jmp __c115                               ; $d929: 4c 15 c1  
+LoadTitlescreen:
+            jsr ClearScreenAndSprites
+            jsr HideEverything
+            jsr WaitForNMI
+            jsr DisableNMI
+            lda #<NewTitlescreenPtr
+            sta LoadPointerLow
+            lda #>NewTitlescreenPtr
+            sta LoadPointerHigh
+            jsr LoadNametable
+            jsr EnableNMI
+            jmp ShowScreen
 
 ;-------------------------------------------------------------------------------
 TitleScreenNameTablePtrLo:
@@ -3349,18 +3537,18 @@ TitleScreenNameTable:
             .hex 15 15 18 18                         ; $daa4: 15 15 18 18   Data
             .hex 17 24 24 1d                         ; $daa8: 17 24 24 1d   Data
             .hex 1b 12 19 23                         ; $daac: 1b 12 19 23   Data
-            .hex 49 0e f4 01                         ; $dab0: 49 0e f4 01   Data
-            .hex 09 08 04 24                         ; $dab4: 09 08 04 24   Data
+            .hex 49 0e f4 02                         ; $dab0: 49 0e f4 01   Data
+            .hex 00 01 05 24                         ; $dab4: 09 08 04 24   Data
             .hex 17 12 17 1d                         ; $dab8: 17 12 17 1d   Data
             .hex 0e 17 0d 18                         ; $dabc: 0e 17 0d 18   Data
             .hex 00                                  ; $dac0: 00            Data
 
 ;-------------------------------------------------------------------------------
-__dac1:     jsr __c104                               ; $dac1: 20 04 c1  
-            jsr __d90f                               ; $dac4: 20 0f d9  
+__dac1:     jsr EnableNMI                               ; $dac1: 20 04 c1  
+            jsr LoadTitlescreen                               ; $dac4: 20 0f d9  
             lda #$00                                 ; $dac7: a9 00     
             sta GameTimer                            ; $dac9: 85 19     
-__dacb:     jsr __f465                               ; $dacb: 20 65 f4  
+__dacb:     jsr WaitForNMI                               ; $dacb: 20 65 f4  
             lda GameTimer                            ; $dace: a5 19     
             beq __daf1                               ; $dad0: f0 1f     
             jsr __db08                               ; $dad2: 20 08 db  
@@ -5846,7 +6034,7 @@ __f26f:     lda #$ff                                 ; $f26f: a9 ff
 __f278:     jsr __f386                               ; $f278: 20 86 f3  
             dex                                      ; $f27b: ca        
             bpl __f278                               ; $f27c: 10 fa     
-            jsr __d246                               ; $f27e: 20 46 d2  
+            jsr ClearScreenAndSprites                               ; $f27e: 20 46 d2  
             jsr __d293                               ; $f281: 20 93 d2  
             lda $c6                                  ; $f284: a5 c6     
             cmp #$10                                 ; $f286: c9 10     
@@ -5971,7 +6159,7 @@ __f36a:     lda #$00                                 ; $f36a: a9 00
             sta $18                                  ; $f36e: 85 18     
             sta $15                                  ; $f370: 85 15     
             jsr __f40b                               ; $f372: 20 0b f4  
-__f375:     jsr __f465                               ; $f375: 20 65 f4  
+__f375:     jsr WaitForNMI                               ; $f375: 20 65 f4  
             jsr __e768                               ; $f378: 20 68 e7  
             and #$30                                 ; $f37b: 29 30     
             bne __f383                               ; $f37d: d0 04     
@@ -6051,7 +6239,7 @@ __f3f5:     .hex 20 6c 08 19                         ; $f3f5: 20 6c 08 19   Data
             .hex 24 24                               ; $f409: 24 24         Data
 
 ;-------------------------------------------------------------------------------
-__f40b:     jsr __f465                               ; $f40b: 20 65 f4  
+__f40b:     jsr WaitForNMI                               ; $f40b: 20 65 f4  
             ldx #$01                                 ; $f40e: a2 01     
 __f410:     lda __f43b,x                             ; $f410: bd 3b f4  
             ldy __f43d,x                             ; $f413: bc 3d f4  
@@ -6089,13 +6277,13 @@ __f43f:     .hex 88 a8 e8 21                         ; $f43f: 88 a8 e8 21   Data
 
 ;-------------------------------------------------------------------------------
 __f45c:     ldx #$14                                 ; $f45c: a2 14     
-__f45e:     jsr __f465                               ; $f45e: 20 65 f4  
+__f45e:     jsr WaitForNMI                               ; $f45e: 20 65 f4  
             dex                                      ; $f461: ca        
             bne __f45e                               ; $f462: d0 fa     
             rts                                      ; $f464: 60        
 
 ;-------------------------------------------------------------------------------
-__f465:     lda #$00                                 ; $f465: a9 00     
+WaitForNMI:     lda #$00                                 ; $f465: a9 00     
             sta $02                                  ; $f467: 85 02     
 __f469:     lda $02                                  ; $f469: a5 02     
             beq __f469                               ; $f46b: f0 fc     
@@ -6114,7 +6302,7 @@ __f470:     jsr __f469                               ; $f470: 20 69 f4
             lda $01                                  ; $f482: a5 01     
             and #$ef                                 ; $f484: 29 ef     
             sta $2001                                ; $f486: 8d 01 20  
-__f489:     jsr __f465                               ; $f489: 20 65 f4  
+__f489:     jsr WaitForNMI                               ; $f489: 20 65 f4  
             jsr __e768                               ; $f48c: 20 68 e7  
             and #$10                                 ; $f48f: 29 10     
             beq __f489                               ; $f491: f0 f6     
