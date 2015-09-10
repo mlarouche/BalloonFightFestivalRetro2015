@@ -7,6 +7,7 @@
 ;-------------------------------------------------------------------------------
 PpuControlBackup = $00
 BytesLeftToLoad      = $12
+IsBalloonTrip        = $16
 GameTimer            = $19
 LoadPointerLow       = $1d
 LoadPointerHigh      = $1e
@@ -186,7 +187,7 @@ __c0ac:     jsr __d60d                               ; $c0ac: 20 0d d6
             jsr __fff7                               ; $c0c6: 20 f7 ff  
             lda #$01                                 ; $c0c9: a9 01     
             sta $02                                  ; $c0cb: 85 02     
-            lda $16                                  ; $c0cd: a5 16     
+            lda IsBalloonTrip                                  ; $c0cd: a5 16     
             beq __c0f1                               ; $c0cf: f0 20     
 __c0d1:     lda $2002                                ; $c0d1: ad 02 20  
             bmi __c0d1                               ; $c0d4: 30 fb     
@@ -347,7 +348,8 @@ __c1be:     stx $52                                  ; $c1be: 86 52
             rts                                      ; $c1c4: 60        
 
 ;-------------------------------------------------------------------------------
-__c1c5:     lda #$20                                 ; $c1c5: a9 20     
+InitBalloonTrip:
+            lda #$20                                 ; $c1c5: a9 20     
             sta CurrentMusic                         ; $c1c7: 85 f2     
             jsr __c527                               ; $c1c9: 20 27 c5  
             jsr __c539                               ; $c1cc: 20 39 c5  
@@ -2408,14 +2410,16 @@ __d28c:     sta $2007                                ; $d28c: 8d 07 20
             rts                                      ; $d292: 60        
 
 ;-------------------------------------------------------------------------------
-__d293:     jsr HideEverything                               ; $d293: 20 0a c1  
+LoadLevelData:
+            jsr HideEverything                               ; $d293: 20 0a c1  
             jsr DisableNMI                               ; $d296: 20 fa c0  
-            lda $16                                  ; $d299: a5 16     
-            beq __d2a0                               ; $d29b: f0 03     
-            jmp __d572                               ; $d29d: 4c 72 d5  
+            lda IsBalloonTrip                                  ; $d299: a5 16     
+            beq LoadNextLevel                               ; $d29b: f0 03     
+            jmp LoadBalloonTripLevelData                               ; $d29d: 4c 72 d5  
 
 ;-------------------------------------------------------------------------------
-__d2a0:     ldy CurrentLevelHeaderPtr                ; $d2a0: a4 3b     
+LoadNextLevel:
+            ldy CurrentLevelHeaderPtr                ; $d2a0: a4 3b     
             lda LevelHeaderPointersLo,y              ; $d2a2: b9 2a db  
             sta LoadPointerLow                       ; $d2a5: 85 1d     
             lda LevelHeaderPointerHigh,y             ; $d2a7: b9 3a db  
@@ -2612,7 +2616,7 @@ __d421:     lda (LoadPointerLow),y                   ; $d421: b1 1d
             dey                                      ; $d425: 88        
             dex                                      ; $d426: ca        
             bpl __d421                               ; $d427: 10 f8     
-            lda $16                                  ; $d429: a5 16     
+            lda IsBalloonTrip                                  ; $d429: a5 16     
             bne __d40d                               ; $d42b: d0 e0     
 __d42d:     lda (LoadPointerLow),y                   ; $d42d: b1 1d     
             sta $005a,y                              ; $d42f: 99 5a 00  
@@ -2779,7 +2783,8 @@ __d56c:     jsr __cccb                               ; $d56c: 20 cb cc
             jmp __c17c                               ; $d56f: 4c 7c c1  
 
 ;-------------------------------------------------------------------------------
-__d572:     lda #$c0                                 ; $d572: a9 c0     
+LoadBalloonTripLevelData:
+            lda #$c0                                 ; $d572: a9 c0     
             ldy #$23                                 ; $d574: a0 23     
             jsr __d593                               ; $d576: 20 93 d5  
             lda #$c0                                 ; $d579: a9 c0     
@@ -3021,7 +3026,7 @@ __d767:     lda ($21),y                              ; $d767: b1 21
             dey                                      ; $d76c: 88        
             bpl __d767                               ; $d76d: 10 f8     
             inc $46                                  ; $d76f: e6 46     
-            lda $16                                  ; $d771: a5 16     
+            lda IsBalloonTrip                                  ; $d771: a5 16     
             beq __d778                               ; $d773: f0 03     
             jsr __c539                               ; $d775: 20 39 c5  
 __d778:     rts                                      ; $d778: 60        
@@ -3091,7 +3096,7 @@ __d7d1:     lda $0d,x                                ; $d7d1: b5 0d
             lda #$24                                 ; $d7de: a9 24     
             sta $2007                                ; $d7e0: 8d 07 20  
             sta $2007                                ; $d7e3: 8d 07 20  
-            lda $16                                  ; $d7e6: a5 16     
+            lda IsBalloonTrip                                  ; $d7e6: a5 16     
             bne __d854                               ; $d7e8: d0 6a     
             lda NumberOfPlayers                      ; $d7ea: a5 40     
             beq __d802                               ; $d7ec: f0 14     
@@ -3374,14 +3379,15 @@ TitleScreenNameTable:
             .hex 00                                  ; $dac0: 00            Data
 
 ;-------------------------------------------------------------------------------
-__dac1:     jsr EnableNMI                               ; $dac1: 20 04 c1  
+TitlescreenUpdate:
+            jsr EnableNMI                               ; $dac1: 20 04 c1  
             jsr LoadTitlescreen                               ; $dac4: 20 0f d9  
             lda #$00                                 ; $dac7: a9 00     
             sta GameTimer                            ; $dac9: 85 19     
 __dacb:     jsr WaitForNMI                               ; $dacb: 20 65 f4  
             lda GameTimer                            ; $dace: a5 19     
-            beq __daf1                               ; $dad0: f0 1f     
-            jsr __db08                               ; $dad2: 20 08 db  
+            beq SetupDemo                               ; $dad0: f0 1f     
+            jsr Titlescreen_UpdateParameters         ; $dad2: 20 08 db  
             jsr ReadInput                               ; $dad5: 20 68 e7  
             tax                                      ; $dad8: aa        
             and #$10                                 ; $dad9: 29 10     
@@ -3400,21 +3406,22 @@ __daed:     jmp __dacb                               ; $daed: 4c cb da
 __daf0:     rts                                      ; $daf0: 60        
 
 ;-------------------------------------------------------------------------------
-__daf1:     inc $3a                                  ; $daf1: e6 3a     
+SetupDemo:
+            inc $3a                                  ; $daf1: e6 3a     
             inc NumberOfPlayers                      ; $daf3: e6 40     
             lda #$00                                 ; $daf5: a9 00     
             sta $4015                                ; $daf7: 8d 15 40  
-            sta $16                                  ; $dafa: 85 16     
+            sta IsBalloonTrip                                  ; $dafa: 85 16     
             jsr __f1f2                               ; $dafc: 20 f2 f1  
             lda #$00                                 ; $daff: a9 00     
             sta $3a                                  ; $db01: 85 3a     
-            beq __dac1                               ; $db03: f0 bc     
+            beq TitlescreenUpdate                               ; $db03: f0 bc     
 
 ;-------------------------------------------------------------------------------
 __db05:     .hex 01 02 00                            ; $db05: 01 02 00      Data
 __db08:     lda GameMode                             ; $db08: a5 3f     
             lsr                                      ; $db0a: 4a        
-            sta $16                                  ; $db0b: 85 16     
+            sta IsBalloonTrip                                  ; $db0b: 85 16     
             lda GameMode                             ; $db0d: a5 3f     
             tax                                      ; $db0f: aa        
             and #$01                                 ; $db10: 29 01     
@@ -4915,7 +4922,7 @@ __eb3f:     lda __e649,y                             ; $eb3f: b9 49 e6
             lda __e655,y                             ; $eb45: b9 55 e6  
             sta $042d,x                              ; $eb48: 9d 2d 04  
 __eb4b:     jsr __eb8e                               ; $eb4b: 20 8e eb  
-            lda $16                                  ; $eb4e: a5 16     
+            lda IsBalloonTrip                                  ; $eb4e: a5 16     
             beq __eb62                               ; $eb50: f0 10     
             lda Player1X,x                           ; $eb52: b5 91     
             cmp #$10                                 ; $eb54: c9 10     
@@ -5787,7 +5794,7 @@ __f1b7:     asl $1b                                  ; $f1b7: 06 1b
             rts                                      ; $f1d3: 60        
 
 ;-------------------------------------------------------------------------------
-__f1d4:     jsr __dac1                               ; $f1d4: 20 c1 da  
+__f1d4:     jsr TitlescreenUpdate                               ; $f1d4: 20 c1 da  
             ldx #$09                                 ; $f1d7: a2 09     
 __f1d9:     lda #$00                                 ; $f1d9: a9 00     
             sta $03,x                                ; $f1db: 95 03     
@@ -5866,7 +5873,7 @@ __f278:     jsr __f386                               ; $f278: 20 86 f3
             dex                                      ; $f27b: ca        
             bpl __f278                               ; $f27c: 10 fa     
             jsr ClearScreenAndSprites                               ; $f27e: 20 46 d2  
-            jsr __d293                               ; $f281: 20 93 d2  
+            jsr LoadLevelData                               ; $f281: 20 93 d2  
             lda $c6                                  ; $f284: a5 c6     
             cmp #$10                                 ; $f286: c9 10     
             bcs __f28e                               ; $f288: b0 04     
@@ -5874,9 +5881,9 @@ __f278:     jsr __f386                               ; $f278: 20 86 f3
             sta $c6                                  ; $f28c: 85 c6     
 __f28e:     jsr __f4a5                               ; $f28e: 20 a5 f4  
             jsr __d8ff                               ; $f291: 20 ff d8  
-            lda $16                                  ; $f294: a5 16     
+            lda IsBalloonTrip                                  ; $f294: a5 16     
             beq __f29b                               ; $f296: f0 03     
-            jmp __c1c5                               ; $f298: 4c c5 c1  
+            jmp InitBalloonTrip                               ; $f298: 4c c5 c1  
 
 ;-------------------------------------------------------------------------------
 __f29b:     lda IsBonusPhase                         ; $f29b: a5 c8     
@@ -6141,7 +6148,7 @@ __f489:     jsr WaitForNMI                               ; $f489: 20 65 f4
             sta $2001                                ; $f495: 8d 01 20  
             ldy #$04                                 ; $f498: a0 04     
             lda IsBonusPhase                         ; $f49a: a5 c8     
-            ora $16                                  ; $f49c: 05 16     
+            ora IsBalloonTrip                                  ; $f49c: 05 16     
             beq __f4a2                               ; $f49e: f0 02     
             ldy #$20                                 ; $f4a0: a0 20     
 __f4a2:     sty CurrentMusic                         ; $f4a2: 84 f2     

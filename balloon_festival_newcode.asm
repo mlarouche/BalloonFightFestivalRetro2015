@@ -1,7 +1,27 @@
+Titlescreen_UpdateParameters:
+    ldx GameMode
+    lda GameModeIsBalloonTrip,x
+    sta IsBalloonTrip
+    lda GameModeNumberOfPlayers,x
+    sta NumberOfPlayers
+    lda NewTitleScreenCursorOptionY,x
+    sta $057b
+    lda #$2c
+    sta $0567
+    ldx #$00
+    stx $055d
+    jmp __ce2f
+
+GameModeIsBalloonTrip:
+    .hex 0 0 1 0
+
+GameModeNumberOfPlayers:
+    .hex 0 1 0 0
+
 NewTitlescreenPtr:
     .db <NewTitlescreen
     .db >NewTitlescreen
-    
+
 NewTitlescreen:
     ; background palette 0
     .hex 3f 00 04 0f 30 27 2a
@@ -172,9 +192,9 @@ NewTitlescreen:
 
 NewTitleScreenCursorOptionY:
     .hex 8c 9c ac bc
-    
+
 NextOptionSelection:
     .hex 01 02 03 00
-	
+
 NewD779:
-	.hex 29 2e 33 29
+    .hex 29 2e 33 29
