@@ -75,183 +75,7 @@ Player2BonusBalloon  = $05ce
 ;-------------------------------------------------------------------------------
 			.org $8000
 
-NewTitlescreenPtr:
-    .db <NewTitlescreen
-    .db >NewTitlescreen
-    
-NewTitlescreen:
-    ; background palette 0
-    .hex 3f 00 04 0f 30 27 2a
-    ; sprite palette 2
-    .hex 3f 18 04 0f 16 30 21
-
-    .hex 20 7c 21
-    .hex f0 f1 24 24 24 24 e0 e1 e1 e2 e0 e1 e1 e2 e0 e2
-    .hex 24 e0 e2 24 e0 e1 e1 e2 e0 e1 e1 e2 e0 ec 24 e0
-    .hex e2
-
-    .hex 20 a2 1b
-    .hex e3 e3 e3
-    .hex e5 e3 e3 e3
-    .hex e5 e3 e5 24
-    .hex e3 e5 24 e3
-    .hex e3 e3 e5 e3
-    .hex e3 e3 e5 e3
-    .hex e3 f3 e3 e5
-
-    .hex 20 c2 1b
-    .hex e3
-    .hex e4 e3 e7 e3
-    .hex e4 e3 e5 e3
-    .hex e5 24 e3 e5
-    .hex 24 e3 e4 e3
-    .hex e5 e3 e4 e3
-    .hex e5 e3 e3 e3
-    .hex e3 e5
-    
-    .hex 20 e2 1b
-    .hex e3 e3 e3
-    .hex e2 e3 e3 e3
-    .hex e5 e3 e5 24
-    .hex e3 e5 24 e3
-    .hex e3 e3 e5 e3
-    .hex e3 e3 e5 e3
-    .hex e3 e3 e3 e5
-
-    .hex 21 02 1b
-    .hex e3
-    .hex e4 e3 e5 e3
-    .hex f2 e3 e5 e3
-    .hex e3 e2 e3 e3
-    .hex e2 e3 e3 e3
-    .hex e5 e3 e3 e3
-    .hex e5 e3 f2 e3
-    .hex e3 e5
-    
-    .hex 21 22 1b
-    .hex e6 e3 e3
-    .hex e7 eb 24 e6
-    .hex e7 e6 e3 e7
-    .hex e6 e3 e7 e6
-    .hex e3 e3 e7 e6
-    .hex e3 e3 e7 eb
-    .hex 24 e6 e3 e7
-    
-    .hex 21 4c 12
-    .hex e0
-    .hex e1 e1 e2 e0
-    .hex e2 e0 e1 e1
-    .hex e2 e8 24 e0
-    .hex e2 e0 e1 e1
-    .hex e2
-    
-    .hex 21 6c 12
-    .hex e3 e3 e3 e7
-    .hex e3 e5 e3 f5
-    .hex f6 e7 e3 f3
-    .hex e3 e5 e6 e3
-    .hex e3 e7
-    
-    .hex 21 8c 12
-    .hex e3 e3 ef
-    .hex 24 e3 e5 e3
-    .hex 24 24 24 e3
-    .hex e3 e3 e5 24
-    .hex e3 e5 24 
-    
-    .hex 21 ac 12
-    .hex e3 e3
-    .hex e1 ea e3 e5
-    .hex e3 e9 e3 e2
-    .hex e3 e3 e3 e5
-    .hex 24 e3 e5 24
-    
-    .hex 21 cc 12
-    .hex e3
-    .hex e3 ef 24 e3
-    .hex e5 e3 f3 e3
-    .hex e5 e3 f2 e3
-    .hex e5 24 e3 e5
-    .hex 24
-    
-    .hex 21 ec 12
-    .hex e6 e7 24 24
-    .hex e6 e7 e6 e7
-    .hex e6 e7 eb 24
-    .hex e6 e7 24 e6
-    .hex e7 24 
-    
-    ; HOMMAGE A
-    .hex 21 82 09
-    .db "HOMMAGE"-$37
-    .hex 24
-    .db "A"-$37
-    
-    ; SATORU
-    .hex 21 A2 09
-    .hex 24 24 24
-    .db "SATORU"-$37
-    
-    ; IWATA
-    .hex 21 C2 09
-    .hex 24 24 24 24
-    .db "IWATA"-$37
-    
-    ; First choice
-    .hex 22 48 11
-    .db "A"-$37
-    .hex 24 24
-    .db "PARTIE"-$37
-    .hex 24
-    .db "1"-"0"
-    .hex 24
-    .db "IWATA"-$37
-    
-    ; Second choice
-    .hex 22 88 11
-    .db "B"-$37
-    .hex 24 24
-    .db "PARTIE"-$37
-    .hex 24
-    .db "2"-"0"
-    .hex 24
-    .db "IWATA"-$37
-    
-    ; Third choice
-    .hex 22 c8 10
-    .db "C"-$37
-    .hex 24 24
-    .db "VOYAGE"-$37
-    .hex 24
-    .db "BALLON"-$37
-    
-    ; Fourth choice (ze competition)
-    .hex 23 08 0e
-    .db "D"-$37
-    .hex 24 24
-    .db "COMPETITION"-$37
-    
-    ; Copyright 1984 Nintendo
-    .hex 23 49 0e
-    .hex f4 01 09 08 04 24 17 12 17 1d 0e 17 0d 18
-    
-    ; Copyright retrogamer.ca
-    .hex 23 66 13
-    .hex f4
-    .db "2015"-"0"
-    .hex 24
-    .db "RETROGAMER"-$37
-    .db "."-8
-    .db "CA"-$37
-    
-    ; EOD
-    .hex 00
-
-NewTitleScreenCursorOptionY:
-    .hex 8c 9c ac bc
-    
-NextOptionSelection:
-    .hex 01 02 03 00
+INCLUDE balloon_festival_newcode.asm
 
 ;-------------------------------------------------------------------------------
 ; Program Origin
@@ -3137,7 +2961,7 @@ __d6e5:     ldx $3e                                  ; $d6e5: a6 3e
             jsr __d77c                               ; $d6fb: 20 7c d7  
             sta $44                                  ; $d6fe: 85 44     
             ldx GameMode                             ; $d700: a6 3f     
-            lda __d779,x                             ; $d702: bd 79 d7  
+            lda NewD779,x                             ; $d702: bd 79 d7  
             sta $21                                  ; $d705: 85 21     
             lda #$06                                 ; $d707: a9 06     
             sta $22                                  ; $d709: 85 22     
@@ -3558,7 +3382,7 @@ __dacb:     jsr WaitForNMI                               ; $dacb: 20 65 f4
             lda GameTimer                            ; $dace: a5 19     
             beq __daf1                               ; $dad0: f0 1f     
             jsr __db08                               ; $dad2: 20 08 db  
-            jsr __e768                               ; $dad5: 20 68 e7  
+            jsr ReadInput                               ; $dad5: 20 68 e7  
             tax                                      ; $dad8: aa        
             and #$10                                 ; $dad9: 29 10     
             bne __daf0                               ; $dadb: d0 13     
@@ -4607,7 +4431,8 @@ __e762:     .hex 1f 0f 07                            ; $e762: 1f 0f 07      Data
 __e765:     .hex 20 10 08                            ; $e765: 20 10 08      Data
 
 ;-------------------------------------------------------------------------------
-__e768:     ldx #$00                                 ; $e768: a2 00     
+ReadInput:
+            ldx #$00                                 ; $e768: a2 00     
 __e76a:     lda #$01                                 ; $e76a: a9 01     
             sta $4016                                ; $e76c: 8d 16 40  
             lda #$00                                 ; $e76f: a9 00     
@@ -6115,7 +5940,7 @@ __f30d:     dex                                      ; $f30d: ca
             bmi __f366                               ; $f316: 30 4e     
 __f318:     lda $3a                                  ; $f318: a5 3a     
             beq __f327                               ; $f31a: f0 0b     
-            jsr __e768                               ; $f31c: 20 68 e7  
+            jsr ReadInput                               ; $f31c: 20 68 e7  
             lda $061c                                ; $f31f: ad 1c 06  
             and #$30                                 ; $f322: 29 30     
             beq __f2b9                               ; $f324: f0 93     
@@ -6166,7 +5991,7 @@ __f36a:     lda #$00                                 ; $f36a: a9 00
             sta $15                                  ; $f370: 85 15     
             jsr __f40b                               ; $f372: 20 0b f4  
 __f375:     jsr WaitForNMI                               ; $f375: 20 65 f4  
-            jsr __e768                               ; $f378: 20 68 e7  
+            jsr ReadInput                               ; $f378: 20 68 e7  
             and #$30                                 ; $f37b: 29 30     
             bne __f383                               ; $f37d: d0 04     
             dec $15                                  ; $f37f: c6 15     
@@ -6300,7 +6125,7 @@ __f46f:     rts                                      ; $f46f: 60
 __f470:     jsr __f469                               ; $f470: 20 69 f4  
             lda $3a                                  ; $f473: a5 3a     
             bne __f46f                               ; $f475: d0 f8     
-            jsr __e768                               ; $f477: 20 68 e7  
+            jsr ReadInput                               ; $f477: 20 68 e7  
             and #$10                                 ; $f47a: 29 10     
             beq __f46f                               ; $f47c: f0 f1     
             lda #$04                                 ; $f47e: a9 04     
@@ -6309,7 +6134,7 @@ __f470:     jsr __f469                               ; $f470: 20 69 f4
             and #$ef                                 ; $f484: 29 ef     
             sta $2001                                ; $f486: 8d 01 20  
 __f489:     jsr WaitForNMI                               ; $f489: 20 65 f4  
-            jsr __e768                               ; $f48c: 20 68 e7  
+            jsr ReadInput                               ; $f48c: 20 68 e7  
             and #$10                                 ; $f48f: 29 10     
             beq __f489                               ; $f491: f0 f6     
             lda $01                                  ; $f493: a5 01     
