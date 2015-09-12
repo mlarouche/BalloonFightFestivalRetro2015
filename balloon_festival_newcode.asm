@@ -16,7 +16,197 @@ GameModeIsBalloonTrip:
     .hex 0 0 1 0
 
 GameModeNumberOfPlayers:
-    .hex 0 1 0 0
+    .hex 0 1 0 1
+
+IsCompetitionSelected:
+    ; Original code hijacked
+    ldx #$09
+    lda #$00
+-
+    sta $03, x
+    dex
+    bpl -
+    sta $3e
+
+    lda GameMode
+    cmp #$03
+    bne +
+
+    jsr CompetitionUpdate
++
+    rts
+
+CompetitionUpdate:
+    jsr EnableNMI
+    jsr LoadCompetitionPresentationScreen
+    lda #20
+    sta CurrentMusic
+-
+    jsr WaitForNMI
+    jsr ReadInput
+    and #$10
+    bne +
+    jmp -
++
+    rts
+    
+LoadCompetitionPresentationScreen:
+    jsr ClearScreenAndSprites
+    jsr HideEverything
+    jsr WaitForNMI
+    jsr DisableNMI
+
+    ldx #24
+    ldy #0
+-
+    lda IwataSpriteCompPresentation,y
+    sta $0200,y
+    iny
+    dex
+    bne -
+
+    lda #<CompetitionPresentationPtr
+    sta LoadPointerLow
+    lda #>CompetitionPresentationPtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+    jsr EnableNMI
+    jmp ShowScreen
+
+CompetitionPresentationPtr:
+    .db <CompetitionPresentationNametable
+    .db >CompetitionPresentationNametable
+
+CompetitionPresentationNametable:
+    ; background palette 0
+    .hex 3f 00 04 0f 30 27 2a
+    ; sprite palette 0
+    .hex 3f 10 04 0f 16 12 37
+
+    ; Nametable data
+    .hex 20 A8 11
+    .db "PLEASE"-$37
+    .hex 24
+    .db "UNDERSTAND"-$37
+    
+    .hex 21 63 1A
+    .db "BIENVENUE"-$37
+    .hex 24
+    .db "A"-$37
+    .hex 24
+    .db "LA"-$37
+    .hex 24
+    .db "COMPETITION"-$37
+    
+    .hex 21 87 11
+    .db "DE"-$37
+    .hex 24
+    .db "BALLOON"-$37
+    .hex 24
+    .db "FIGHT"-$37
+    .hex 2C ; !
+    
+    .hex 21 C1 1D
+    .db "2"-"0"
+    .hex 24
+    .db "JOUEURS"-$37
+    .hex 27 ; ,
+    .db "3"-"0"
+    .hex 24
+    .db "MINUTES"-$37
+    .hex 27 ; ,
+    .db "CELUI"-$37
+    .hex 24
+    .db "QUI"-$37
+    
+    .hex 21 E4 19
+    .db "A"-$37
+    .hex 24
+    .db "LE"-$37
+    .hex 24
+    .db "MAX"-$37
+    .hex 24
+    .db "DE"-$37
+    .hex 24
+    .db "POINTS"-$37
+    .hex 24
+    .db "GAGNE"-$37
+    .hex 2C ; !
+
+    .hex 22 22 1C
+    .db "APPUYEZ"-$37
+    .hex 24
+    .db "SUR"-$37
+    .hex 24
+    .db "A"-$37
+    .hex 24
+    .db "POUR"-$37
+    .hex 24
+    .db "CONFIRMER"-$37
+
+    .hex 22 49 0F
+    .db "VOTRE"-$37
+    .hex 24
+    .db "PRESENCE"-$37
+    .hex 26 ; .
+
+    .hex 22 A7 13
+    .db "JOUEUR"-$37
+    .hex 24
+    .db "1"-"0"
+    .hex 29 ; =
+    .db "EN"-$37
+    .hex 24
+    .db "ATTENTE"-$37
+
+    .hex 22 E7 13
+    .db "JOUEUR"-$37
+    .hex 24
+    .db "2"-"0"
+    .hex 29 ; =
+    .db "EN"-$37
+    .hex 24
+    .db "ATTENTE"-$37
+
+    ; EOD
+    .hex 0
+
+IwataSpriteX1 = 120
+IwataSpriteX2 = 128
+IwataSpriteY1 = 56
+IwataSpriteY2 = 64
+IwataSpriteY3 = 72
+
+IwataSpriteCompPresentation:
+    .db IwataSpriteY1
+    .hex 0
+    .hex 0
+    .db IwataSpriteX1
+
+    .db IwataSpriteY1
+    .hex 0D
+    .hex 0
+    .db IwataSpriteX2
+
+    .db IwataSpriteY2
+    .hex 38
+    .hex 0
+    .db IwataSpriteX1
+
+    .db IwataSpriteY2
+    .hex 39
+    .hex 0
+    .db IwataSpriteX2
+
+    .db IwataSpriteY3
+    .hex 02
+    .hex 0
+    .db IwataSpriteX1
+
+    .db IwataSpriteY3
+    .hex 07
+    .hex 0
+    .db IwataSpriteX2
 
 NewTitlescreenPtr:
     .db <NewTitlescreen

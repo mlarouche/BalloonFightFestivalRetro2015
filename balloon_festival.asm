@@ -5795,12 +5795,20 @@ __f1b7:     asl $1b                                  ; $f1b7: 06 1b
 
 ;-------------------------------------------------------------------------------
 __f1d4:     jsr TitlescreenUpdate                               ; $f1d4: 20 c1 da  
-            ldx #$09                                 ; $f1d7: a2 09     
-__f1d9:     lda #$00                                 ; $f1d9: a9 00     
-            sta $03,x                                ; $f1db: 95 03     
-            dex                                      ; $f1dd: ca        
-            bpl __f1d9                               ; $f1de: 10 f9     
-            sta $3e                                  ; $f1e0: 85 3e     
+            jsr IsCompetitionSelected
+            lda #$00
+            beq TitlescreenSetupGame
+            ;ldx #$09                                 ; $f1d7: a2 09     
+;__f1d9:     lda #$00                                 ; $f1d9: a9 00     
+;            sta $03,x                                ; $f1db: 95 03     
+;            dex                                      ; $f1dd: ca        
+;            bpl __f1d9                               ; $f1de: 10 f9     
+;            sta $3e                                  ; $f1e0: 85 3e     
+            nop
+            nop
+            nop
+            nop
+TitlescreenSetupGame:
             inc Player1Lives                         ; $f1e2: e6 41     
             jsr __d6de                               ; $f1e4: 20 de d6  
             lda #$0f                                 ; $f1e7: a9 0f     
