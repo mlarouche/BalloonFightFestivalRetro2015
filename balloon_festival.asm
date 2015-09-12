@@ -2630,8 +2630,8 @@ __d437:     .hex 3f 00 20 0f                         ; $d437: 3f 00 20 0f   Data
             .hex 30 27 15 0f                         ; $d43f: 30 27 15 0f   Data
             .hex 30 02 21 0f                         ; $d443: 30 02 21 0f   Data
             .hex 30 00 10 0f                         ; $d447: 30 00 10 0f   Data
-            .hex 16 12 37 0f                         ; $d44b: 16 12 37 0f   Data
-            .hex 12 16 37 0f                         ; $d44f: 12 16 37 0f   Data
+            .hex 0C 1D 37 0f                         ; Player 1 Palette
+            .hex 13 1D 37 0f                         ; Player 2 Palette
             .hex 17 11 35 0f                         ; $d453: 17 11 35 0f   Data
             .hex 17 11 2b                            ; $d457: 17 11 2b      Data
 __d45a:     .hex 0f 2a 09 07                         ; $d45a: 0f 2a 09 07   Data
