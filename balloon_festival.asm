@@ -7394,4 +7394,4 @@ vectors:    .dw nmi                        ; $fffa: 94 c0     Vector table
 ;-------------------------------------------------------------------------------
 ; CHR-ROM
 ;-------------------------------------------------------------------------------
-            .incbin balloon_fight.chr                ; Include CHR-ROM
+            .incbin balloon_festival.chr                ; Include CHR-ROM

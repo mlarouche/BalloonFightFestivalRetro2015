@@ -81,7 +81,7 @@ CompetitionPresentationNametable:
     ; background palette 0
     .hex 3f 00 04 0f 30 27 2a
     ; sprite palette 0
-    .hex 3f 10 04 0f 16 12 37
+    .hex 3f 10 04 0f 0C 1D 37
 
     ; Nametable data
     .hex 20 A8 11
@@ -106,7 +106,7 @@ CompetitionPresentationNametable:
     .db "FIGHT"-$37
     .hex 2C ; !
     
-    .hex 21 C1 1D
+    .hex 21 E1 1D
     .db "2"-"0"
     .hex 24
     .db "JOUEURS"-$37
@@ -119,7 +119,7 @@ CompetitionPresentationNametable:
     .hex 24
     .db "QUI"-$37
     
-    .hex 21 E4 19
+    .hex 22 04 19
     .db "A"-$37
     .hex 24
     .db "LE"-$37
@@ -133,7 +133,7 @@ CompetitionPresentationNametable:
     .db "GAGNE"-$37
     .hex 2C ; !
 
-    .hex 22 22 1C
+    .hex 22 62 1C
     .db "APPUYEZ"-$37
     .hex 24
     .db "SUR"-$37
@@ -144,13 +144,13 @@ CompetitionPresentationNametable:
     .hex 24
     .db "CONFIRMER"-$37
 
-    .hex 22 49 0F
+    .hex 22 89 0F
     .db "VOTRE"-$37
     .hex 24
     .db "PRESENCE"-$37
     .hex 26 ; .
 
-    .hex 22 A7 13
+    .hex 22 E7 13
     .db "JOUEUR"-$37
     .hex 24
     .db "1"-"0"
@@ -159,7 +159,7 @@ CompetitionPresentationNametable:
     .hex 24
     .db "ATTENTE"-$37
 
-    .hex 22 E7 13
+    .hex 23 27 13
     .db "JOUEUR"-$37
     .hex 24
     .db "2"-"0"
@@ -184,7 +184,7 @@ IwataSpriteCompPresentation:
     .db IwataSpriteX1
 
     .db IwataSpriteY1
-    .hex 0D
+    .hex 0B
     .hex 0
     .db IwataSpriteX2
 
@@ -199,12 +199,12 @@ IwataSpriteCompPresentation:
     .db IwataSpriteX2
 
     .db IwataSpriteY3
-    .hex 02
+    .hex 27
     .hex 0
     .db IwataSpriteX1
 
     .db IwataSpriteY3
-    .hex 07
+    .hex 05
     .hex 0
     .db IwataSpriteX2
 
