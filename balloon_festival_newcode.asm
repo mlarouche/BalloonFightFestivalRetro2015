@@ -39,7 +39,9 @@ IsCompetitionSelected:
 CompetitionUpdate:
     jsr EnableNMI
     jsr LoadCompetitionPresentationScreen
-    lda #20
+    lda #$0F
+    sta $4015
+    lda #$20
     sta CurrentMusic
 -
     jsr WaitForNMI
