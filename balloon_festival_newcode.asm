@@ -39,19 +39,101 @@ IsCompetitionSelected:
 CompetitionUpdate:
     jsr EnableNMI
     jsr LoadCompetitionPresentationScreen
+
     lda #$0F
     sta $4015
     lda #$20
     sta CurrentMusic
--
+
+    lda #$00
+    sta Player1State
+    sta Player2State
+
+competitionUpdateLoop:
     jsr WaitForNMI
-    jsr ReadInput
-    and #$10
-    bne +
-    jmp -
+    jsr ReadInputP1
+    tax
+    and #Button_Start
+    beq +
+    lda Player1State
+    beq +
+    lda Player2State
+    jmp competitionUpdateExit
 +
+    txa
+    and #Button_A
+    beq +
+    lda Player1State
+    bne +
+
+    lda #$01
+    sta Player1State
+
+    jsr HideEverything
+    jsr DisableNMI
+
+    lda #<Player1JoinedNametableUpdatePtr
+    sta LoadPointerLow
+    lda #>Player1JoinedNametableUpdatePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+
+    lda Player2State
+    beq noPlayer2Confirm
+    lda #<PressStartNametableUpdatePtr
+    sta LoadPointerLow
+    lda #>PressStartNametableUpdatePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+noPlayer2Confirm:
+    jsr EnableNMI
+    jsr ShowScreen
+    jmp competitionUpdateLoop
++
+    ldx #$01
+    jsr ReadInputP2
+    tax
+    and #Button_Start
+    beq +
+    lda Player1State
+    beq +
+    lda Player2State
+    bne competitionUpdateExit
++
+    txa
+    and #Button_A
+    beq +
+    lda Player2State
+    bne +
+
+    lda #$01
+    sta Player2State
+
+    jsr HideEverything
+    jsr DisableNMI
+
+    lda #<Player2JoinedNametableUpdatePtr
+    sta LoadPointerLow
+    lda #>Player2JoinedNametableUpdatePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+
+    lda Player1State
+    beq noPlayer1Confirm
+    lda #<PressStartNametableUpdatePtr
+    sta LoadPointerLow
+    lda #>PressStartNametableUpdatePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+noPlayer1Confirm:
+    jsr EnableNMI
+    jsr ShowScreen
++
+    jmp competitionUpdateLoop
+competitionUpdateExit:
+    jsr StartCompetitionScreen
     rts
-    
+
 LoadCompetitionPresentationScreen:
     jsr ClearScreenAndSprites
     jsr HideEverything
@@ -75,9 +157,34 @@ LoadCompetitionPresentationScreen:
     jsr EnableNMI
     jmp ShowScreen
 
+StartCompetitionScreen:
+    lda #$00
+    sta $4015
+    jsr ClearScreenAndSprites
+    jsr HideEverything
+    jsr WaitForNMI
+    jsr DisableNMI
+
+    lda #<StartCompetitionNametablePtr
+    sta LoadPointerLow
+    lda #>StartCompetitionNametablePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+    jsr EnableNMI
+    jsr ShowScreen
+
+    lda #$00
+    sta GameTimer
+-
+    lda GameTimer
+    cmp #150 ; 2.5 seconds in frame count
+    bne -
+    rts
+
 CompetitionPresentationPtr:
     .db <CompetitionPresentationNametable
     .db >CompetitionPresentationNametable
+    .hex 0 0
 
 CompetitionPresentationNametable:
     ; background palette 0
@@ -90,7 +197,7 @@ CompetitionPresentationNametable:
     .db "PLEASE"-$37
     .hex 24
     .db "UNDERSTAND"-$37
-    
+
     .hex 21 63 1A
     .db "BIENVENUE"-$37
     .hex 24
@@ -99,7 +206,7 @@ CompetitionPresentationNametable:
     .db "LA"-$37
     .hex 24
     .db "COMPETITION"-$37
-    
+
     .hex 21 87 11
     .db "DE"-$37
     .hex 24
@@ -107,7 +214,7 @@ CompetitionPresentationNametable:
     .hex 24
     .db "FIGHT"-$37
     .hex 2C ; !
-    
+
     .hex 21 E1 1D
     .db "2"-"0"
     .hex 24
@@ -120,7 +227,7 @@ CompetitionPresentationNametable:
     .db "CELUI"-$37
     .hex 24
     .db "QUI"-$37
-    
+
     .hex 22 04 19
     .db "A"-$37
     .hex 24
@@ -210,9 +317,68 @@ IwataSpriteCompPresentation:
     .hex 0
     .db IwataSpriteX2
 
+Player1JoinedNametableUpdatePtr:
+    .db <Player1JoinedNametableUpdate
+    .db >Player1JoinedNametableUpdate
+    .hex 0 0
+
+Player1JoinedNametableUpdate:
+    .hex 22 F0 0A
+    .db "PRET"-$37
+    .hex 2C ; !
+    .dsb 5,$24
+    
+    ; EOD
+    .hex 0
+    
+Player2JoinedNametableUpdatePtr:
+    .db <Player2JoinedNametableUpdate
+    .db >Player2JoinedNametableUpdate
+    .hex 0 0
+
+Player2JoinedNametableUpdate:
+    .hex 23 30 0A
+    .db "PRET"-$37
+    .hex 2C ; !
+    .dsb 5,$24
+
+    ; EOD
+    .hex 0
+
+PressStartNametableUpdatePtr:
+    .db <PressStartNametableUpdate
+    .db >PressStartNametableUpdate
+    .hex 0 0
+
+PressStartNametableUpdate:
+    .hex 23 68 11
+    .db "APPUYEZ"-$37
+    .hex 24
+    .db "SUR"-$37
+    .hex 24
+    .db "START"-$37
+
+    .hex 0
+
+StartCompetitionNametablePtr:
+    .db <StartCompetitionNametable
+    .db >StartCompetitionNametable
+    .hex 0
+    .hex 0
+    
+StartCompetitionNametable:
+    ; background palette 0
+    .hex 3f 00 04 0f 30 27 2a
+
+    .hex 21 AC 07
+    .db "HAJIME"-$37
+    .hex 2C ; !
+    .hex 0
+
 NewTitlescreenPtr:
     .db <NewTitlescreen
     .db >NewTitlescreen
+    .hex 0 0
 
 NewTitlescreen:
     ; background palette 0

@@ -56,6 +56,15 @@ BonusPhaseSuperBonus2 = $055c
 Player1BonusBallons  = $05cd
 Player2BonusBalloon  = $05ce
 
+Button_Up = $08
+Button_Down = $04
+Button_Left = $02
+Button_Right = $01
+Button_Start = $10
+Button_Select = $20
+Button_B = $40
+Button_A = $80
+
 ;-------------------------------------------------------------------------------
 ; iNES Header
 ;-------------------------------------------------------------------------------
@@ -3388,7 +3397,7 @@ __dacb:     jsr WaitForNMI                               ; $dacb: 20 65 f4
             lda GameTimer                            ; $dace: a5 19     
             beq SetupDemo                               ; $dad0: f0 1f     
             jsr Titlescreen_UpdateParameters         ; $dad2: 20 08 db  
-            jsr ReadInput                               ; $dad5: 20 68 e7  
+            jsr ReadInputP1                               ; $dad5: 20 68 e7  
             tax                                      ; $dad8: aa        
             and #$10                                 ; $dad9: 29 10     
             bne __daf0                               ; $dadb: d0 13     
@@ -4377,7 +4386,7 @@ __e6e9:     cpx #$02                                 ; $e6e9: e0 02
             sta $31,x                                ; $e6f6: 95 31     
 __e6f8:     lda $3a                                  ; $e6f8: a5 3a     
             bne __e705                               ; $e6fa: d0 09     
-            jsr __e76a                               ; $e6fc: 20 6a e7  
+            jsr ReadInputP2                               ; $e6fc: 20 6a e7  
             lda $061c,x                              ; $e6ff: bd 1c 06  
             sta $31,x                                ; $e702: 95 31     
 __e704:     rts                                      ; $e704: 60        
@@ -4438,9 +4447,10 @@ __e762:     .hex 1f 0f 07                            ; $e762: 1f 0f 07      Data
 __e765:     .hex 20 10 08                            ; $e765: 20 10 08      Data
 
 ;-------------------------------------------------------------------------------
-ReadInput:
+ReadInputP1:
             ldx #$00                                 ; $e768: a2 00     
-__e76a:     lda #$01                                 ; $e76a: a9 01     
+ReadInputP2:
+            lda #$01                                 ; $e76a: a9 01     
             sta $4016                                ; $e76c: 8d 16 40  
             lda #$00                                 ; $e76f: a9 00     
             sta $4016                                ; $e771: 8d 16 40  
@@ -5955,7 +5965,7 @@ __f30d:     dex                                      ; $f30d: ca
             bmi __f366                               ; $f316: 30 4e     
 __f318:     lda $3a                                  ; $f318: a5 3a     
             beq __f327                               ; $f31a: f0 0b     
-            jsr ReadInput                               ; $f31c: 20 68 e7  
+            jsr ReadInputP1                               ; $f31c: 20 68 e7  
             lda $061c                                ; $f31f: ad 1c 06  
             and #$30                                 ; $f322: 29 30     
             beq __f2b9                               ; $f324: f0 93     
@@ -6006,7 +6016,7 @@ __f36a:     lda #$00                                 ; $f36a: a9 00
             sta $15                                  ; $f370: 85 15     
             jsr __f40b                               ; $f372: 20 0b f4  
 __f375:     jsr WaitForNMI                               ; $f375: 20 65 f4  
-            jsr ReadInput                               ; $f378: 20 68 e7  
+            jsr ReadInputP1                               ; $f378: 20 68 e7  
             and #$30                                 ; $f37b: 29 30     
             bne __f383                               ; $f37d: d0 04     
             dec $15                                  ; $f37f: c6 15     
@@ -6140,7 +6150,7 @@ __f46f:     rts                                      ; $f46f: 60
 __f470:     jsr __f469                               ; $f470: 20 69 f4  
             lda $3a                                  ; $f473: a5 3a     
             bne __f46f                               ; $f475: d0 f8     
-            jsr ReadInput                               ; $f477: 20 68 e7  
+            jsr ReadInputP1                               ; $f477: 20 68 e7  
             and #$10                                 ; $f47a: 29 10     
             beq __f46f                               ; $f47c: f0 f1     
             lda #$04                                 ; $f47e: a9 04     
@@ -6149,7 +6159,7 @@ __f470:     jsr __f469                               ; $f470: 20 69 f4
             and #$ef                                 ; $f484: 29 ef     
             sta $2001                                ; $f486: 8d 01 20  
 __f489:     jsr WaitForNMI                               ; $f489: 20 65 f4  
-            jsr ReadInput                               ; $f48c: 20 68 e7  
+            jsr ReadInputP1                               ; $f48c: 20 68 e7  
             and #$10                                 ; $f48f: 29 10     
             beq __f489                               ; $f491: f0 f6     
             lda $01                                  ; $f493: a5 01     
