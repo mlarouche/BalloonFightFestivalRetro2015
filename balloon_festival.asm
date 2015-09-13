@@ -65,6 +65,8 @@ Button_Select = $20
 Button_B = $40
 Button_A = $80
 
+GameMode_Competition = $03
+
 ;-------------------------------------------------------------------------------
 ; iNES Header
 ;-------------------------------------------------------------------------------
@@ -3122,8 +3124,11 @@ __d802:     dec $46                                  ; $d802: c6 46
             rts                                      ; $d804: 60        
 
 ;-------------------------------------------------------------------------------
-__d805:     dec $46                                  ; $d805: c6 46     
-            lda #$20                                 ; $d807: a9 20     
+__d805:
+    jsr NewDisplayLives
+    rts
+            ;dec $46                                  ; $d805: c6 46     
+            ;lda #$20                                 ; $d807: a9 20     
             sta $2006                                ; $d809: 8d 06 20  
             lda #$62                                 ; $d80c: a9 62     
             sta $2006                                ; $d80e: 8d 06 20  
@@ -3158,6 +3163,7 @@ __d841:     lda __d84b,x                             ; $d841: bd 4b d8
             bpl __d841                               ; $d848: 10 f7     
             rts                                      ; $d84a: 60        
 
+; Game Over text in HUD
 ;-------------------------------------------------------------------------------
 __d84b:     .hex 1b 0e 1f 18                         ; $d84b: 1b 0e 1f 18   Data
             .hex 24 0e 16 0a                         ; $d84f: 24 0e 16 0a   Data
@@ -5887,7 +5893,7 @@ __f26f:     lda #$ff                                 ; $f26f: a9 ff
             dex                                      ; $f273: ca        
             bpl __f26f                               ; $f274: 10 f9     
             ldx NumberOfPlayers                      ; $f276: a6 40     
-__f278:     jsr __f386                               ; $f278: 20 86 f3  
+__f278:     jsr OldSetupPlayer                               ; $f278: 20 86 f3  
             dex                                      ; $f27b: ca        
             bpl __f278                               ; $f27c: 10 fa     
             jsr ClearScreenAndSprites                               ; $f27e: 20 46 d2  
@@ -5949,11 +5955,12 @@ __f2e4:     lda Player1Ballons,x                     ; $f2e4: b5 88
             jsr __c726                               ; $f2f6: 20 26 c7  
             pla                                      ; $f2f9: 68        
             tax                                      ; $f2fa: aa        
-            ldy #$02                                 ; $f2fb: a0 02     
-            dec Player1Lives,x                       ; $f2fd: d6 41     
-            sty $46                                  ; $f2ff: 84 46     
+            jsr NoDecreaseLivesInCompetition
+            nop
+            nop
+            nop
             bmi __f30d                               ; $f301: 30 0a     
-            jsr __f386                               ; $f303: 20 86 f3  
+            jsr OldSetupPlayer                               ; $f303: 20 86 f3  
             jsr __f3b0                               ; $f306: 20 b0 f3  
             lda #$80                                 ; $f309: a9 80     
             sta CurrentMusic                         ; $f30b: 85 f2     
@@ -6024,7 +6031,8 @@ __f375:     jsr WaitForNMI                               ; $f375: 20 65 f4
 __f383:     jmp __f1d4                               ; $f383: 4c d4 f1  
 
 ;-------------------------------------------------------------------------------
-__f386:     lda Player1Lives,x                       ; $f386: b5 41     
+OldSetupPlayer:
+            lda Player1Lives,x                       ; $f386: b5 41     
             bmi __f3ad                               ; $f388: 30 23     
             lda PlayerStartPositionX,x               ; $f38a: bd ae f3  
             sta Player1X,x                           ; $f38d: 95 91     

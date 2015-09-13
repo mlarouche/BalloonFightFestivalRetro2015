@@ -29,7 +29,7 @@ IsCompetitionSelected:
     sta $3e
 
     lda GameMode
-    cmp #$03
+    cmp #GameMode_Competition
     bne +
 
     jsr CompetitionUpdate
@@ -130,6 +130,7 @@ noPlayer1Confirm:
     jsr ShowScreen
 +
     jmp competitionUpdateLoop
+
 competitionUpdateExit:
     jsr StartCompetitionScreen
     rts
@@ -180,6 +181,71 @@ StartCompetitionScreen:
     cmp #150 ; 2.5 seconds in frame count
     bne -
     rts
+
+NoDecreaseLivesInCompetition:
+    ldy #$02
+    lda GameMode
+    cmp #GameMode_Competition
+    beq +
+    dec Player1Lives,x
++
+    sty $46
+
+    rts
+
+NewDisplayLives:
+    dec $46
+    lda #$20
+    sta $2006
+    lda #$62
+    sta $2006
+    lda Player1Lives
+    jsr DrawLives
+    lda NumberOfPlayers
+    beq NewDisplayLivesExit
+    lda #$20
+    sta $2006
+    lda #$75
+    sta $2006
+    lda Player2Lives
+DrawLives:
+    bmi DisplayGameOverInHUD
+DoDrawLives:
+    sta $50
+    ldx #$06
+-
+    lda #$24
+    cpx $50
+    bcs NewDisplayLivesWritePPU
+    lda GameMode
+    cmp #GameMode_Competition
+    bne +
+    lda #$24
+    bne NewDisplayLivesWritePPU
++
+    lda #$2a
+NewDisplayLivesWritePPU:
+    sta $2007
+    dex
+    bpl -
+NewDisplayLivesExit:
+    rts
+
+DisplayGameOverInHUD:
+    lda NumberOfPlayers
+    beq DoDrawLives
+    ldx #$08
+-
+    lda GameOverHUDText,x
+    sta $2007
+    dex
+    bpl -
+    rts
+
+GameOverHUDText:
+    .hex 1b 0e 1f 18
+    .hex 24 0e 16 0a
+    .hex 10
 
 CompetitionPresentationPtr:
     .db <CompetitionPresentationNametable
