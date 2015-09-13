@@ -6006,8 +6006,9 @@ __f34c:     dex                                      ; $f34c: ca
             sta CurrentMusic                         ; $f351: 85 f2     
 __f353:     ldx #$96                                 ; $f353: a2 96     
             jsr __f45e                               ; $f355: 20 5e f4  
-            ldx CurrentLevelHeaderPtr                ; $f358: a6 3b     
-            inx                                      ; $f35a: e8        
+            jmp NewLevelIncrement
+            ;ldx CurrentLevelHeaderPtr                ; $f358: a6 3b     
+            ;inx                                      ; $f35a: e8        
             cpx #$10                                 ; $f35b: e0 10     
             bne __f361                               ; $f35d: d0 02     
             ldx #$04                                 ; $f35f: a2 04     

@@ -247,6 +247,27 @@ GameOverHUDText:
     .hex 24 0e 16 0a
     .hex 10
 
+NewLevelIncrement:
+    ldx CurrentLevelHeaderPtr
+    inx
+
+    lda GameMode
+    cmp #GameMode_Competition
+    bne NewLevelIncrementOC
+    txa
+    and #3
+    cmp #3
+    bne NewLevelIncrementOC
+    inx
+
+NewLevelIncrementOC:
+    cpx #$10
+    bne +
+    ldx #$04
++
+    stx CurrentLevelHeaderPtr
+    jmp __f213
+
 CompetitionPresentationPtr:
     .db <CompetitionPresentationNametable
     .db >CompetitionPresentationNametable
