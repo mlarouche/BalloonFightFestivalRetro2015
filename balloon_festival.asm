@@ -13,6 +13,8 @@ LoadPointerLow       = $1d
 LoadPointerHigh      = $1e
 GfxPointerLow        = $1f
 GfxPointerHigh       = $20
+AddToGfxPointerLow   = $21
+AddToGfxPointerHigh  = $22
 PlatformLeftLow      = $23
 PlatformLeftHigh     = $24
 PlatformRightLow     = $25
@@ -23,12 +25,17 @@ PlatformBottomLow    = $29
 PlatformBottonHigh   = $2a
 CurrentLevelHeaderPtr = $3b
 CurrentPhaseCount    = $3c
+PhaseFlashTimer      = $3d
 GameMode             = $3f
 NumberOfPlayers      = $40
 Player1Lives         = $41
 Player2Lives         = $42
 BalloonTripRankUnitDigit = $49
 BalloonTripRankTenDigit = $4a
+PpuAddressHigh = $50
+PpuAddressLow = $51
+PreviousGfxBufferIndex = $52
+GfxBufferIndex = $53
 CloudGfxX            = $54
 CloudGfxY            = $55
 Player1Ballons       = $88
@@ -181,10 +188,10 @@ nmi:        pha                                      ; $c094: 48
             sta $2003                                ; $c09b: 8d 03 20  
             lda #$02                                 ; $c09e: a9 02     
             sta $4014                                ; $c0a0: 8d 14 40  
-            lda $52                                  ; $c0a3: a5 52     
-            cmp $53                                  ; $c0a5: c5 53     
+            lda PreviousGfxBufferIndex                                  ; $c0a3: a5 52     
+            cmp GfxBufferIndex                                  ; $c0a5: c5 53     
             beq __c0ac                               ; $c0a7: f0 03     
-            jsr __c17c                               ; $c0a9: 20 7c c1  
+            jsr CallUpdateGfx                               ; $c0a9: 20 7c c1  
 __c0ac:     jsr __d60d                               ; $c0ac: 20 0d d6  
             jsr __d798                               ; $c0af: 20 98 d7  
             inc GameTimer                            ; $c0b2: e6 19     
@@ -262,36 +269,37 @@ __c11e:     lda $0057,y                              ; $c11e: b9 57 00
             iny                                      ; $c125: c8        
             cpy $56                                  ; $c126: c4 56     
             bne __c11e                               ; $c128: d0 f4     
-            stx $53                                  ; $c12a: 86 53     
+            stx GfxBufferIndex                                  ; $c12a: 86 53     
             rts                                      ; $c12c: 60        
 
 ;-------------------------------------------------------------------------------
 __c12d:     lda #$57                                 ; $c12d: a9 57     
             ldy #$00                                 ; $c12f: a0 00     
-__c131:     sta $21                                  ; $c131: 85 21     
-            sty $22                                  ; $c133: 84 22     
+AddToGfxBuffer:
+            sta AddToGfxPointerLow                                  ; $c131: 85 21     
+            sty AddToGfxPointerHigh                                  ; $c133: 84 22     
             txa                                      ; $c135: 8a        
             pha                                      ; $c136: 48        
             ldy #$02                                 ; $c137: a0 02     
-            lda ($21),y                              ; $c139: b1 21     
+            lda (AddToGfxPointerLow),y                              ; $c139: b1 21     
             clc                                      ; $c13b: 18        
             adc #$03                                 ; $c13c: 69 03     
             sta BytesLeftToLoad                      ; $c13e: 85 12     
-            ldx $53                                  ; $c140: a6 53     
+            ldx GfxBufferIndex                                  ; $c140: a6 53     
             ldy #$00                                 ; $c142: a0 00     
-__c144:     lda ($21),y                              ; $c144: b1 21     
+__c144:     lda (AddToGfxPointerLow),y                              ; $c144: b1 21     
             sta $0300,x                              ; $c146: 9d 00 03  
             inx                                      ; $c149: e8        
             iny                                      ; $c14a: c8        
             cpy BytesLeftToLoad                      ; $c14b: c4 12     
             bne __c144                               ; $c14d: d0 f5     
-            stx $53                                  ; $c14f: 86 53     
+            stx GfxBufferIndex                                  ; $c14f: 86 53     
             pla                                      ; $c151: 68        
             tax                                      ; $c152: aa        
             rts                                      ; $c153: 60        
 
 ;-------------------------------------------------------------------------------
-__c154:     ldx $53                                  ; $c154: a6 53     
+__c154:     ldx GfxBufferIndex                                  ; $c154: a6 53     
             lda #$00                                 ; $c156: a9 00     
             sta BytesLeftToLoad                      ; $c158: 85 12     
             lda CloudGfxY                            ; $c15a: a5 55     
@@ -317,11 +325,12 @@ __c154:     ldx $53                                  ; $c154: a6 53
             rts                                      ; $c17b: 60        
 
 ;-------------------------------------------------------------------------------
-__c17c:     tya                                      ; $c17c: 98        
+CallUpdateGfx:
+            tya                                      ; $c17c: 98        
             pha                                      ; $c17d: 48        
             txa                                      ; $c17e: 8a        
             pha                                      ; $c17f: 48        
-            jsr __c188                               ; $c180: 20 88 c1  
+            jsr UpdateGfx                               ; $c180: 20 88 c1  
             pla                                      ; $c183: 68        
             tax                                      ; $c184: aa        
             pla                                      ; $c185: 68        
@@ -329,10 +338,11 @@ __c17c:     tya                                      ; $c17c: 98
             rts                                      ; $c187: 60        
 
 ;-------------------------------------------------------------------------------
-__c188:     ldx $52                                  ; $c188: a6 52     
+UpdateGfx:
+            ldx PreviousGfxBufferIndex                                  ; $c188: a6 52     
             lda $0300,x                              ; $c18a: bd 00 03  
             inx                                      ; $c18d: e8        
-            sta $50                                  ; $c18e: 85 50     
+            sta PpuAddressHigh                                  ; $c18e: 85 50     
             sta $2006                                ; $c190: 8d 06 20  
             lda $0300,x                              ; $c193: bd 00 03  
             inx                                      ; $c196: e8        
@@ -344,7 +354,7 @@ __c19e:     lda $0300,x                              ; $c19e: bd 00 03
             sta $2007                                ; $c1a2: 8d 07 20  
             dey                                      ; $c1a5: 88        
             bne __c19e                               ; $c1a6: d0 f6     
-            lda $50                                  ; $c1a8: a5 50     
+            lda PpuAddressHigh                                  ; $c1a8: a5 50     
             cmp #$3f                                 ; $c1aa: c9 3f     
             bne __c1be                               ; $c1ac: d0 10     
             lda #$3f                                 ; $c1ae: a9 3f     
@@ -353,9 +363,9 @@ __c19e:     lda $0300,x                              ; $c19e: bd 00 03
             sta $2006                                ; $c1b5: 8d 06 20  
             sta $2006                                ; $c1b8: 8d 06 20  
             sta $2006                                ; $c1bb: 8d 06 20  
-__c1be:     stx $52                                  ; $c1be: 86 52     
-            cpx $53                                  ; $c1c0: e4 53     
-            bne __c188                               ; $c1c2: d0 c4     
+__c1be:     stx PreviousGfxBufferIndex                                  ; $c1be: 86 52     
+            cpx GfxBufferIndex                                  ; $c1c0: e4 53     
+            bne UpdateGfx                               ; $c1c2: d0 c4     
             rts                                      ; $c1c4: 60        
 
 ;-------------------------------------------------------------------------------
@@ -1207,7 +1217,7 @@ __c856:     and #$03                                 ; $c856: 29 03
             sta $58                                  ; $c881: 85 58     
 __c883:     lda #$57                                 ; $c883: a9 57     
             ldy #$00                                 ; $c885: a0 00     
-            jmp __c131                               ; $c887: 4c 31 c1  
+            jmp AddToGfxBuffer                               ; $c887: 4c 31 c1  
 
 ;-------------------------------------------------------------------------------
 __c88a:     rts                                      ; $c88a: 60        
@@ -1760,7 +1770,7 @@ __cd0f:     tya                                      ; $cd0f: 98
             pha                                      ; $cd10: 48        
             lda #$57                                 ; $cd11: a9 57     
             ldy #$00                                 ; $cd13: a0 00     
-            jsr __c131                               ; $cd15: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $cd15: 20 31 c1  
             pla                                      ; $cd18: 68        
             tay                                      ; $cd19: a8        
             lda $58                                  ; $cd1a: a5 58     
@@ -2042,13 +2052,13 @@ __cf51:     lda $055d,x                              ; $cf51: bd 5d 05
             jsr __f45e                               ; $cf64: 20 5e f4  
             lda #$2b                                 ; $cf67: a9 2b     
             ldy #$d1                                 ; $cf69: a0 d1     
-            jsr __c131                               ; $cf6b: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $cf6b: 20 31 c1  
             lda #$5a                                 ; $cf6e: a9 5a     
             ldy #$d1                                 ; $cf70: a0 d1     
-            jsr __c131                               ; $cf72: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $cf72: 20 31 c1  
             lda #$65                                 ; $cf75: a9 65     
             ldy #$d1                                 ; $cf77: a0 d1     
-            jsr __c131                               ; $cf79: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $cf79: 20 31 c1  
             ldx NumberOfPlayers                      ; $cf7c: a6 40     
 __cf7e:     lda #$20                                 ; $cf7e: a9 20     
             sta Player1X,x                           ; $cf80: 95 91     
@@ -2138,7 +2148,7 @@ __d02e:     jsr __ce2f                               ; $d02e: 20 2f ce
             bne __d068                               ; $d041: d0 25     
             lda #$70                                 ; $d043: a9 70     
             ldy #$d1                                 ; $d045: a0 d1     
-            jsr __c131                               ; $d047: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $d047: 20 31 c1  
             jsr WaitForNMI                               ; $d04a: 20 65 f4  
             ldx #$1a                                 ; $d04d: a2 1a     
 __d04f:     lda __d184,x                             ; $d04f: bd 84 d1  
@@ -2167,7 +2177,7 @@ __d070:     lda #$00                                 ; $d070: a9 00
             jsr __d213                               ; $d084: 20 13 d2  
             lda #$65                                 ; $d087: a9 65     
             ldy #$00                                 ; $d089: a0 00     
-            jsr __c131                               ; $d08b: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $d08b: 20 31 c1  
 __d08e:     lda #$01                                 ; $d08e: a9 01     
             sta $f1                                  ; $d090: 85 f1     
             ldx #$02                                 ; $d092: a2 02     
@@ -2302,7 +2312,7 @@ __d1a2:     lda __d13e,x                             ; $d1a2: bd 3e d1
 ;-------------------------------------------------------------------------------
 __d1c2:     lda #$65                                 ; $d1c2: a9 65     
             ldy #$00                                 ; $d1c4: a0 00     
-            jmp __c131                               ; $d1c6: 4c 31 c1  
+            jmp AddToGfxBuffer                               ; $d1c6: 4c 31 c1  
 
 ;-------------------------------------------------------------------------------
 __d1c9:     ldy #$00                                 ; $d1c9: a0 00     
@@ -2477,7 +2487,7 @@ __d2cb:     sta $2007                                ; $d2cb: 8d 07 20
             stx $a4                                  ; $d301: 86 a4     
             lda #$03                                 ; $d303: a9 03     
             jsr __c856                               ; $d305: 20 56 c8  
-            jsr __c17c                               ; $d308: 20 7c c1  
+            jsr CallUpdateGfx                               ; $d308: 20 7c c1  
             ldx $a4                                  ; $d30b: a6 a4     
             lda CloudGfxX                            ; $d30d: a5 54     
             asl                                      ; $d30f: 0a        
@@ -2791,7 +2801,7 @@ __d53c:     lda #$23                                 ; $d53c: a9 23
 __d564:     .hex fc f3 cf 3f                         ; $d564: fc f3 cf 3f   Data
 __d568:     .hex 01 04 10 40                         ; $d568: 01 04 10 40   Data
 __d56c:     jsr __cccb                               ; $d56c: 20 cb cc  
-            jmp __c17c                               ; $d56f: 4c 7c c1  
+            jmp CallUpdateGfx                               ; $d56f: 4c 7c c1  
 
 ;-------------------------------------------------------------------------------
 LoadBalloonTripLevelData:
@@ -2851,9 +2861,9 @@ __d5cb:     txa                                      ; $d5cb: 8a
 __d5d9:     ldx #$00                                 ; $d5d9: a2 00     
 __d5db:     jsr __d651                               ; $d5db: 20 51 d6  
             jsr __d5f1                               ; $d5de: 20 f1 d5  
-            lda $51                                  ; $d5e1: a5 51     
+            lda PpuAddressLow                                  ; $d5e1: a5 51     
             ora #$04                                 ; $d5e3: 09 04     
-            sta $51                                  ; $d5e5: 85 51     
+            sta PpuAddressLow                                  ; $d5e5: 85 51     
             jsr __d5f1                               ; $d5e7: 20 f1 d5  
             inx                                      ; $d5ea: e8        
             inx                                      ; $d5eb: e8        
@@ -2862,9 +2872,9 @@ __d5db:     jsr __d651                               ; $d5db: 20 51 d6
             rts                                      ; $d5f0: 60        
 
 ;-------------------------------------------------------------------------------
-__d5f1:     lda $51                                  ; $d5f1: a5 51     
+__d5f1:     lda PpuAddressLow                                  ; $d5f1: a5 51     
             sta $2006                                ; $d5f3: 8d 06 20  
-            lda $50                                  ; $d5f6: a5 50     
+            lda PpuAddressHigh                                  ; $d5f6: a5 50     
             sta $2006                                ; $d5f8: 8d 06 20  
             lda $2007                                ; $d5fb: ad 07 20  
             lda $2007                                ; $d5fe: ad 07 20  
@@ -2889,9 +2899,9 @@ __d60d:     lda $4c                                  ; $d60d: a5 4c
             sta $4f                                  ; $d61a: 85 4f     
             tax                                      ; $d61c: aa        
             jsr __d651                               ; $d61d: 20 51 d6  
-            lda $51                                  ; $d620: a5 51     
+            lda PpuAddressLow                                  ; $d620: a5 51     
             sta $2006                                ; $d622: 8d 06 20  
-            lda $50                                  ; $d625: a5 50     
+            lda PpuAddressHigh                                  ; $d625: a5 50     
             sta $2006                                ; $d627: 8d 06 20  
             lda $2007                                ; $d62a: ad 07 20  
             lda $2007                                ; $d62d: ad 07 20  
@@ -2903,9 +2913,9 @@ __d632:     cmp __d64c,y                             ; $d632: d9 4c d6
 __d63a:     rts                                      ; $d63a: 60        
 
 ;-------------------------------------------------------------------------------
-__d63b:     lda $51                                  ; $d63b: a5 51     
+__d63b:     lda PpuAddressLow                                  ; $d63b: a5 51     
             sta $2006                                ; $d63d: 8d 06 20  
-            lda $50                                  ; $d640: a5 50     
+            lda PpuAddressHigh                                  ; $d640: a5 50     
             sta $2006                                ; $d642: 8d 06 20  
             lda __d64d,y                             ; $d645: b9 4d d6  
             sta $2007                                ; $d648: 8d 07 20  
@@ -2917,9 +2927,9 @@ __d64d:     .hex ed ee ef 24                         ; $d64d: ed ee ef 24   Data
 
 ;-------------------------------------------------------------------------------
 __d651:     lda __d65c,x                             ; $d651: bd 5c d6  
-            sta $50                                  ; $d654: 85 50     
+            sta PpuAddressHigh                                  ; $d654: 85 50     
             lda __d65d,x                             ; $d656: bd 5d d6  
-            sta $51                                  ; $d659: 85 51     
+            sta PpuAddressLow                                  ; $d659: 85 51     
             rts                                      ; $d65b: 60        
 
 ;-------------------------------------------------------------------------------
@@ -2978,9 +2988,9 @@ __d6e5:     ldx $3e                                  ; $d6e5: a6 3e
             sta $44                                  ; $d6fe: 85 44     
             ldx GameMode                             ; $d700: a6 3f     
             lda NewD779,x                             ; $d702: bd 79 d7  
-            sta $21                                  ; $d705: 85 21     
+            sta AddToGfxPointerLow                                  ; $d705: 85 21     
             lda #$06                                 ; $d707: a9 06     
-            sta $22                                  ; $d709: 85 22     
+            sta AddToGfxPointerHigh                                  ; $d709: 85 22     
             lda $3e                                  ; $d70b: a5 3e     
             asl                                      ; $d70d: 0a        
             asl                                      ; $d70e: 0a        
@@ -3013,7 +3023,7 @@ __d6e5:     ldx $3e                                  ; $d6e5: a6 3e
             inx                                      ; $d743: e8        
             ldy #$04                                 ; $d744: a0 04     
 __d746:     lda $03,x                                ; $d746: b5 03     
-            cmp ($21),y                              ; $d748: d1 21     
+            cmp (AddToGfxPointerLow),y                              ; $d748: d1 21     
             bcc __d765                               ; $d74a: 90 19     
             bne __d752                               ; $d74c: d0 04     
             dex                                      ; $d74e: ca        
@@ -3026,13 +3036,13 @@ __d752:     ldy #$00                                 ; $d752: a0 00
             ora $3e                                  ; $d758: 05 3e     
             tax                                      ; $d75a: aa        
 __d75b:     lda $03,x                                ; $d75b: b5 03     
-            sta ($21),y                              ; $d75d: 91 21     
+            sta (AddToGfxPointerLow),y                              ; $d75d: 91 21     
             inx                                      ; $d75f: e8        
             iny                                      ; $d760: c8        
             cpy #$05                                 ; $d761: c0 05     
             bne __d75b                               ; $d763: d0 f6     
 __d765:     ldy #$04                                 ; $d765: a0 04     
-__d767:     lda ($21),y                              ; $d767: b1 21     
+__d767:     lda (AddToGfxPointerLow),y                              ; $d767: b1 21     
             sta $000d,y                              ; $d769: 99 0d 00  
             dey                                      ; $d76c: 88        
             bpl __d767                               ; $d76d: 10 f8     
@@ -3142,10 +3152,10 @@ __d805:
             sta $2006                                ; $d821: 8d 06 20  
             lda Player2Lives                         ; $d824: a5 42     
 __d826:     bmi __d83b                               ; $d826: 30 13     
-__d828:     sta $50                                  ; $d828: 85 50     
+__d828:     sta PpuAddressHigh                                  ; $d828: 85 50     
             ldx #$06                                 ; $d82a: a2 06     
 __d82c:     lda #$24                                 ; $d82c: a9 24     
-            cpx $50                                  ; $d82e: e4 50     
+            cpx PpuAddressHigh                                  ; $d82e: e4 50     
             bcs __d834                               ; $d830: b0 02     
             lda #$2a                                 ; $d832: a9 2a     
 __d834:     sta $2007                                ; $d834: 8d 07 20  
@@ -4106,15 +4116,15 @@ __e459:     ldy Player1Y,x                           ; $e459: b4 9a
 __e463:     ora #$20                                 ; $e463: 09 20     
 __e465:     sta $14                                  ; $e465: 85 14     
             lda #$43                                 ; $e467: a9 43     
-            sta $21                                  ; $e469: 85 21     
+            sta AddToGfxPointerLow                                  ; $e469: 85 21     
             lda #$e0                                 ; $e46b: a9 e0     
-            sta $22                                  ; $e46d: 85 22     
+            sta AddToGfxPointerHigh                                  ; $e46d: 85 22     
             lda $0448,x                              ; $e46f: bd 48 04  
             beq __e47c                               ; $e472: f0 08     
             lda #$79                                 ; $e474: a9 79     
-            sta $21                                  ; $e476: 85 21     
+            sta AddToGfxPointerLow                                  ; $e476: 85 21     
             lda #$e0                                 ; $e478: a9 e0     
-            sta $22                                  ; $e47a: 85 22     
+            sta AddToGfxPointerHigh                                  ; $e47a: 85 22     
 __e47c:     ldy #$00                                 ; $e47c: a0 00     
             lda (LoadPointerLow),y                   ; $e47e: b1 1d     
             inc LoadPointerLow                       ; $e480: e6 1d     
@@ -4124,10 +4134,10 @@ __e486:     asl                                      ; $e486: 0a
             sta $13                                  ; $e487: 85 13     
             asl                                      ; $e489: 0a        
             adc $13                                  ; $e48a: 65 13     
-            adc $21                                  ; $e48c: 65 21     
-            sta $21                                  ; $e48e: 85 21     
+            adc AddToGfxPointerLow                                  ; $e48c: 65 21     
+            sta AddToGfxPointerLow                                  ; $e48e: 85 21     
             bcc __e494                               ; $e490: 90 02     
-            inc $22                                  ; $e492: e6 22     
+            inc AddToGfxPointerHigh                                  ; $e492: e6 22     
 __e494:     txa                                      ; $e494: 8a        
             pha                                      ; $e495: 48        
             ldx #$05                                 ; $e496: a2 05     
@@ -4154,10 +4164,10 @@ __e4b1:     ldy $13                                  ; $e4b1: a4 13
             ldy #$00                                 ; $e4bd: a0 00     
             lda $15                                  ; $e4bf: a5 15     
             clc                                      ; $e4c1: 18        
-            adc ($21),y                              ; $e4c2: 71 21     
-            inc $21                                  ; $e4c4: e6 21     
+            adc (AddToGfxPointerLow),y                              ; $e4c2: 71 21     
+            inc AddToGfxPointerLow                                  ; $e4c4: e6 21     
             bne __e4ca                               ; $e4c6: d0 02     
-            inc $22                                  ; $e4c8: e6 22     
+            inc AddToGfxPointerHigh                                  ; $e4c8: e6 22     
 __e4ca:     ldy $13                                  ; $e4ca: a4 13     
             sta (GfxPointerLow),y                    ; $e4cc: 91 1f     
             iny                                      ; $e4ce: c8        
@@ -5911,11 +5921,12 @@ __f28e:     jsr __f4a5                               ; $f28e: 20 a5 f4
 
 ;-------------------------------------------------------------------------------
 __f29b:     lda IsBonusPhase                         ; $f29b: a5 c8     
-            beq __f2a2                               ; $f29d: f0 03     
+            beq MainUpdateLoop                               ; $f29d: f0 03     
             jmp __cf13                               ; $f29f: 4c 13 cf  
 
 ;-------------------------------------------------------------------------------
-__f2a2:     jsr __c716                               ; $f2a2: 20 16 c7  
+MainUpdateLoop:
+            jsr __c716                               ; $f2a2: 20 16 c7  
             lda CurrentLevelHeaderPtr                ; $f2a5: a5 3b     
             and #$03                                 ; $f2a7: 29 03     
             bne __f2b3                               ; $f2a9: d0 08     
@@ -5924,13 +5935,13 @@ __f2a2:     jsr __c716                               ; $f2a2: 20 16 c7
             ldx $3a                                  ; $f2af: a6 3a     
             bne __f2b9                               ; $f2b1: d0 06     
 __f2b3:     lda #$ff                                 ; $f2b3: a9 ff     
-            sta $3d                                  ; $f2b5: 85 3d     
+            sta PhaseFlashTimer                                  ; $f2b5: 85 3d     
             inc CurrentPhaseCount                    ; $f2b7: e6 3c     
 __f2b9:     jsr __f470                               ; $f2b9: 20 70 f4  
-            lda $3d                                  ; $f2bc: a5 3d     
+            lda PhaseFlashTimer                                  ; $f2bc: a5 3d     
             beq __f2c5                               ; $f2be: f0 05     
-            dec $3d                                  ; $f2c0: c6 3d     
-            jsr __f3cc                               ; $f2c2: 20 cc f3  
+            dec PhaseFlashTimer                                  ; $f2c0: c6 3d     
+            jsr NewInitPhaseDisplay                               ; $f2c2: 20 cc f3  
 __f2c5:     jsr __f1b3                               ; $f2c5: 20 b3 f1  
             jsr __e691                               ; $f2c8: 20 91 e6  
             jsr __c6f9                               ; $f2cb: 20 f9 c6  
@@ -6073,7 +6084,8 @@ __f3c3:     .hex 04 04 03 03                         ; $f3c3: 04 04 03 03   Data
             .hex 02                                  ; $f3cb: 02            Data
 
 ;-------------------------------------------------------------------------------
-__f3cc:     lda $3d                                  ; $f3cc: a5 3d     
+InitPhaseDisplay:
+            lda PhaseFlashTimer                                  ; $f3cc: a5 3d     
             and #$20                                 ; $f3ce: 29 20     
             beq __f3ee                               ; $f3d0: f0 1c     
             ldx #$0a                                 ; $f3d2: a2 0a     
@@ -6093,7 +6105,7 @@ __f3d4:     lda __f3f5,x                             ; $f3d4: bd f5 f3
 ;-------------------------------------------------------------------------------
 __f3ee:     lda #$00                                 ; $f3ee: a9 00     
             ldy #$f4                                 ; $f3f0: a0 f4     
-            jmp __c131                               ; $f3f2: 4c 31 c1  
+            jmp AddToGfxBuffer                               ; $f3f2: 4c 31 c1  
 
 ;-------------------------------------------------------------------------------
 __f3f5:     .hex 20 6c 08 19                         ; $f3f5: 20 6c 08 19   Data
@@ -6108,7 +6120,7 @@ __f40b:     jsr WaitForNMI                               ; $f40b: 20 65 f4
             ldx #$01                                 ; $f40e: a2 01     
 __f410:     lda __f43b,x                             ; $f410: bd 3b f4  
             ldy __f43d,x                             ; $f413: bc 3d f4  
-            jsr __c131                               ; $f416: 20 31 c1  
+            jsr AddToGfxBuffer                               ; $f416: 20 31 c1  
             dex                                      ; $f419: ca        
             bpl __f410                               ; $f41a: 10 f4     
             ldx #$0f                                 ; $f41c: a2 0f     

@@ -1,3 +1,7 @@
+; ========
+; = Code =
+; ========
+
 Titlescreen_UpdateParameters:
     ldx GameMode
     lda GameModeIsBalloonTrip,x
@@ -69,25 +73,20 @@ competitionUpdateLoop:
     lda #$01
     sta Player1State
 
-    jsr HideEverything
-    jsr DisableNMI
-
-    lda #<Player1JoinedNametableUpdatePtr
-    sta LoadPointerLow
-    lda #>Player1JoinedNametableUpdatePtr
-    sta LoadPointerHigh
-    jsr LoadNametable
+    lda #<Player1JoinedNametableUpdate
+    sta AddToGfxPointerLow
+    ldy #>Player1JoinedNametableUpdate
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
 
     lda Player2State
     beq noPlayer2Confirm
-    lda #<PressStartNametableUpdatePtr
-    sta LoadPointerLow
-    lda #>PressStartNametableUpdatePtr
-    sta LoadPointerHigh
-    jsr LoadNametable
+    lda #<PressStartNametableUpdate
+    sta AddToGfxPointerLow
+    ldy #>PressStartNametableUpdate
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
 noPlayer2Confirm:
-    jsr EnableNMI
-    jsr ShowScreen
     jmp competitionUpdateLoop
 +
     ldx #$01
@@ -109,25 +108,20 @@ noPlayer2Confirm:
     lda #$01
     sta Player2State
 
-    jsr HideEverything
-    jsr DisableNMI
-
-    lda #<Player2JoinedNametableUpdatePtr
-    sta LoadPointerLow
-    lda #>Player2JoinedNametableUpdatePtr
-    sta LoadPointerHigh
-    jsr LoadNametable
+    lda #<Player2JoinedNametableUpdate
+    sta AddToGfxPointerLow
+    ldy #>Player2JoinedNametableUpdate
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
 
     lda Player1State
     beq noPlayer1Confirm
-    lda #<PressStartNametableUpdatePtr
-    sta LoadPointerLow
-    lda #>PressStartNametableUpdatePtr
-    sta LoadPointerHigh
-    jsr LoadNametable
+    lda #<PressStartNametableUpdate
+    sta AddToGfxBuffer
+    ldy #>PressStartNametableUpdate
+    sty AddToGfxBuffer
+    jsr AddToGfxBuffer
 noPlayer1Confirm:
-    jsr EnableNMI
-    jsr ShowScreen
 +
     jmp competitionUpdateLoop
 
@@ -268,6 +262,52 @@ NewLevelIncrementOC:
     stx CurrentLevelHeaderPtr
     jmp __f213
 
+NewInitPhaseDisplay:
+    lda GameMode
+    cmp #GameMode_Competition
+    bne NewInitPhaseDisplayOC
+    
+    ldx #$08
+-
+    lda InitialTimerData,x
+    sta $57,x
+    dex
+    bpl -
+    jmp NewInitPhaseDisplayExit
+
+NewInitPhaseDisplayOC:
+    lda $3d
+    and #$20
+    beq ++
+
+    ldx #$0a
+-
+    lda __f3f5,x
+    sta $57,x
+    dex
+    bpl -
+    ldy #$0a
+    lda CurrentPhaseCount
+    sta $43
+    jsr __d77c
+    sta $60
+    lda $43
+    sta $61
+NewInitPhaseDisplayExit:
+    jmp __c12d
+
+++
+    lda #$00
+    ldy #$f4
+    jmp AddToGfxBuffer
+
+InitialTimerData:
+    .hex 20 6e 05
+    .hex 00 02 C0 05 09
+
+; ========
+; = Data =
+; ========
 CompetitionPresentationPtr:
     .db <CompetitionPresentationNametable
     .db >CompetitionPresentationNametable
@@ -404,38 +444,17 @@ IwataSpriteCompPresentation:
     .hex 0
     .db IwataSpriteX2
 
-Player1JoinedNametableUpdatePtr:
-    .db <Player1JoinedNametableUpdate
-    .db >Player1JoinedNametableUpdate
-    .hex 0 0
-
 Player1JoinedNametableUpdate:
     .hex 22 F0 0A
     .db "PRET"-$37
     .hex 2C ; !
     .dsb 5,$24
-    
-    ; EOD
-    .hex 0
-    
-Player2JoinedNametableUpdatePtr:
-    .db <Player2JoinedNametableUpdate
-    .db >Player2JoinedNametableUpdate
-    .hex 0 0
 
 Player2JoinedNametableUpdate:
     .hex 23 30 0A
     .db "PRET"-$37
     .hex 2C ; !
     .dsb 5,$24
-
-    ; EOD
-    .hex 0
-
-PressStartNametableUpdatePtr:
-    .db <PressStartNametableUpdate
-    .db >PressStartNametableUpdate
-    .hex 0 0
 
 PressStartNametableUpdate:
     .hex 23 68 11
@@ -444,8 +463,6 @@ PressStartNametableUpdate:
     .db "SUR"-$37
     .hex 24
     .db "START"-$37
-
-    .hex 0
 
 StartCompetitionNametablePtr:
     .db <StartCompetitionNametable
@@ -641,5 +658,6 @@ NewTitleScreenCursorOptionY:
 NextOptionSelection:
     .hex 01 02 03 00
 
+; This select which top score to load
 NewD779:
-    .hex 29 2e 33 29
+    .hex 29 2e 33 2e
