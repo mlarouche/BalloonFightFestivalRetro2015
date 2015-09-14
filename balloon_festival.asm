@@ -167,7 +167,7 @@ __c077:     lda #$1e                                 ; $c077: a9 1e
             sta $01                                  ; $c079: 85 01     
             lda #$90                                 ; $c07b: a9 90     
             sta PpuControlBackup                                  ; $c07d: 85 00     
-            jmp __f1d4                               ; $c07f: 4c d4 f1  
+            jmp GameInit                               ; $c07f: 4c d4 f1  
 
 ;-------------------------------------------------------------------------------
 __c082:     .hex 48 41 4c                            ; $c082: 48 41 4c      Data
@@ -2014,7 +2014,8 @@ __cf0f:     dey                                      ; $cf0f: 88
 __cf12:     rts                                      ; $cf12: 60        
 
 ;-------------------------------------------------------------------------------
-__cf13:     lda #$20                                 ; $cf13: a9 20     
+BonusStateEnter:
+            lda #$20                                 ; $cf13: a9 20     
             sta CurrentMusic                         ; $cf15: 85 f2     
             jsr __d0e2                               ; $cf17: 20 e2 d0  
             jsr __cd4a                               ; $cf1a: 20 4a cd  
@@ -5820,7 +5821,8 @@ __f1b7:     asl $1b                                  ; $f1b7: 06 1b
             rts                                      ; $f1d3: 60        
 
 ;-------------------------------------------------------------------------------
-__f1d4:     jsr TitlescreenUpdate                               ; $f1d4: 20 c1 da  
+GameInit:
+            jsr TitlescreenUpdate                               ; $f1d4: 20 c1 da  
             jsr IsCompetitionSelected
             lda #$00
             beq TitlescreenSetupGame
@@ -5858,7 +5860,8 @@ __f1fa:     sta Player2Lives                         ; $f1fa: 85 42
 __f20d:     jsr __f3b0                               ; $f20d: 20 b0 f3  
             dex                                      ; $f210: ca        
             bpl __f20d                               ; $f211: 10 fa     
-__f213:     lda #$00                                 ; $f213: a9 00     
+InitGameRound:
+            lda #$00                                 ; $f213: a9 00     
             sta IsBonusPhase                         ; $f215: 85 c8     
             lda CurrentPhaseCount                    ; $f217: a5 3c     
             lsr                                      ; $f219: 4a        
@@ -5916,16 +5919,17 @@ __f278:     jsr OldSetupPlayer                               ; $f278: 20 86 f3
 __f28e:     jsr __f4a5                               ; $f28e: 20 a5 f4  
             jsr __d8ff                               ; $f291: 20 ff d8  
             lda IsBalloonTrip                                  ; $f294: a5 16     
-            beq __f29b                               ; $f296: f0 03     
+            beq EnterGameState                               ; $f296: f0 03     
             jmp InitBalloonTrip                               ; $f298: 4c c5 c1  
 
 ;-------------------------------------------------------------------------------
-__f29b:     lda IsBonusPhase                         ; $f29b: a5 c8     
-            beq MainUpdateLoop                               ; $f29d: f0 03     
-            jmp __cf13                               ; $f29f: 4c 13 cf  
+EnterGameState:
+            lda IsBonusPhase                         ; $f29b: a5 c8     
+            beq MainStateEnter                               ; $f29d: f0 03     
+            jmp BonusStateEnter                               ; $f29f: 4c 13 cf  
 
 ;-------------------------------------------------------------------------------
-MainUpdateLoop:
+MainStateEnter:
             jsr __c716                               ; $f2a2: 20 16 c7  
             lda CurrentLevelHeaderPtr                ; $f2a5: a5 3b     
             and #$03                                 ; $f2a7: 29 03     
@@ -5933,11 +5937,12 @@ MainUpdateLoop:
             lda #$08                                 ; $f2ab: a9 08     
             sta CurrentMusic                         ; $f2ad: 85 f2     
             ldx $3a                                  ; $f2af: a6 3a     
-            bne __f2b9                               ; $f2b1: d0 06     
+            bne MainStateUpdate                               ; $f2b1: d0 06     
 __f2b3:     lda #$ff                                 ; $f2b3: a9 ff     
             sta PhaseFlashTimer                                  ; $f2b5: 85 3d     
             inc CurrentPhaseCount                    ; $f2b7: e6 3c     
-__f2b9:     jsr __f470                               ; $f2b9: 20 70 f4  
+MainStateUpdate:
+            jsr __f470                               ; $f2b9: 20 70 f4  
             lda PhaseFlashTimer                                  ; $f2bc: a5 3d     
             beq __f2c5                               ; $f2be: f0 05     
             dec PhaseFlashTimer                                  ; $f2c0: c6 3d     
@@ -5980,24 +5985,24 @@ __f30d:     dex                                      ; $f30d: ca
             lda Player1Lives                         ; $f310: a5 41     
             bpl __f318                               ; $f312: 10 04     
             lda Player2Lives                         ; $f314: a5 42     
-            bmi __f366                               ; $f316: 30 4e     
+            bmi DoGameOver                               ; $f316: 30 4e     
 __f318:     lda $3a                                  ; $f318: a5 3a     
             beq __f327                               ; $f31a: f0 0b     
             jsr ReadInputP1                               ; $f31c: 20 68 e7  
             lda $061c                                ; $f31f: ad 1c 06  
             and #$30                                 ; $f322: 29 30     
-            beq __f2b9                               ; $f324: f0 93     
+            beq MainStateUpdate                               ; $f324: f0 93     
 __f326:     rts                                      ; $f326: 60        
 
 ;-------------------------------------------------------------------------------
 __f327:     ldx #$05                                 ; $f327: a2 05     
 __f329:     lda $8a,x                                ; $f329: b5 8a     
             beq __f32f                               ; $f32b: f0 02     
-            bpl __f2b9                               ; $f32d: 10 8a     
+            bpl MainStateUpdate                               ; $f32d: 10 8a     
 __f32f:     dex                                      ; $f32f: ca        
             bpl __f329                               ; $f330: 10 f7     
             lda $bb                                  ; $f332: a5 bb     
-            bpl __f2b9                               ; $f334: 10 83     
+            bpl MainStateUpdate                               ; $f334: 10 83     
             ldx NumberOfPlayers                      ; $f336: a6 40     
 __f338:     ldy Player1Ballons,x                     ; $f338: b4 88     
             dey                                      ; $f33a: 88        
@@ -6008,7 +6013,7 @@ __f338:     ldy Player1Ballons,x                     ; $f338: b4 88
             sta Player1Ballons,x                     ; $f343: 95 88     
             lda #$01                                 ; $f345: a9 01     
             sta $c3,x                                ; $f347: 95 c3     
-            jmp __f2b9                               ; $f349: 4c b9 f2  
+            jmp MainStateUpdate                               ; $f349: 4c b9 f2  
 
 ;-------------------------------------------------------------------------------
 __f34c:     dex                                      ; $f34c: ca        
@@ -6024,10 +6029,11 @@ __f353:     ldx #$96                                 ; $f353: a2 96
             bne __f361                               ; $f35d: d0 02     
             ldx #$04                                 ; $f35f: a2 04     
 __f361:     stx CurrentLevelHeaderPtr                ; $f361: 86 3b     
-            jmp __f213                               ; $f363: 4c 13 f2  
+            jmp InitGameRound                               ; $f363: 4c 13 f2  
 
 ;-------------------------------------------------------------------------------
-__f366:     lda #$01                                 ; $f366: a9 01     
+DoGameOver:
+            lda #$01                                 ; $f366: a9 01     
             sta CurrentMusic                         ; $f368: 85 f2     
 __f36a:     lda #$00                                 ; $f36a: a9 00     
             sta $17                                  ; $f36c: 85 17     
@@ -6040,7 +6046,7 @@ __f375:     jsr WaitForNMI                               ; $f375: 20 65 f4
             bne __f383                               ; $f37d: d0 04     
             dec $15                                  ; $f37f: c6 15     
             bne __f375                               ; $f381: d0 f2     
-__f383:     jmp __f1d4                               ; $f383: 4c d4 f1  
+__f383:     jmp GameInit                               ; $f383: 4c d4 f1  
 
 ;-------------------------------------------------------------------------------
 OldSetupPlayer:
