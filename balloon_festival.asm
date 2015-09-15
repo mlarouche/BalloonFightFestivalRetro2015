@@ -74,6 +74,11 @@ Button_A = $80
 
 GameMode_Competition = $03
 
+Competition_FrameCount = $0100
+Competition_Seconds = $0101
+Competition_FinalState = $0102
+Competition_Time = 5
+
 ;-------------------------------------------------------------------------------
 ; iNES Header
 ;-------------------------------------------------------------------------------
@@ -5942,11 +5947,20 @@ __f2b3:     lda #$ff                                 ; $f2b3: a9 ff
             sta PhaseFlashTimer                                  ; $f2b5: 85 3d     
             inc CurrentPhaseCount                    ; $f2b7: e6 3c     
 MainStateUpdate:
-            jsr __f470                               ; $f2b9: 20 70 f4  
-            lda PhaseFlashTimer                                  ; $f2bc: a5 3d     
-            beq __f2c5                               ; $f2be: f0 05     
-            dec PhaseFlashTimer                                  ; $f2c0: c6 3d     
-            jsr NewInitPhaseDisplay                               ; $f2c2: 20 cc f3  
+            jsr CompetitionUpdate
+            jmp __f2c5
+            nop
+            nop
+            nop
+            
+            nop
+            nop
+            nop
+            ;jsr __f470                               ; $f2b9: 20 70 f4  
+            ;lda PhaseFlashTimer                                  ; $f2bc: a5 3d     
+            ;beq __f2c5                               ; $f2be: f0 05     
+            ;dec PhaseFlashTimer                                  ; $f2c0: c6 3d     
+            ;jsr NewInitPhaseDisplay                               ; $f2c2: 20 cc f3  
 __f2c5:     jsr __f1b3                               ; $f2c5: 20 b3 f1  
             jsr __e691                               ; $f2c8: 20 91 e6  
             jsr __c6f9                               ; $f2cb: 20 f9 c6  

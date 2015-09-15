@@ -36,11 +36,11 @@ IsCompetitionSelected:
     cmp #GameMode_Competition
     bne +
 
-    jsr CompetitionUpdate
+    jsr CompetitionPresentationEnter
 +
     rts
 
-CompetitionUpdate:
+CompetitionPresentationEnter:
     jsr EnableNMI
     jsr LoadCompetitionPresentationScreen
 
@@ -53,7 +53,7 @@ CompetitionUpdate:
     sta Player1State
     sta Player2State
 
-competitionUpdateLoop:
+competitionPresentationUpdateLoop:
     jsr WaitForNMI
     jsr ReadInputP1
     tax
@@ -62,7 +62,7 @@ competitionUpdateLoop:
     lda Player1State
     beq +
     lda Player2State
-    jmp competitionUpdateExit
+    jmp competitionPresentationExit
 +
     txa
     and #Button_A
@@ -87,7 +87,7 @@ competitionUpdateLoop:
     sty AddToGfxPointerHigh
     jsr AddToGfxBuffer
 noPlayer2Confirm:
-    jmp competitionUpdateLoop
+    jmp competitionPresentationUpdateLoop
 +
     ldx #$01
     jsr ReadInputP2
@@ -97,7 +97,7 @@ noPlayer2Confirm:
     lda Player1State
     beq +
     lda Player2State
-    bne competitionUpdateExit
+    bne competitionPresentationExit
 +
     txa
     and #Button_A
@@ -123,9 +123,9 @@ noPlayer2Confirm:
     jsr AddToGfxBuffer
 noPlayer1Confirm:
 +
-    jmp competitionUpdateLoop
+    jmp competitionPresentationUpdateLoop
 
-competitionUpdateExit:
+competitionPresentationExit:
     jsr StartCompetitionScreen
     rts
 
@@ -153,8 +153,11 @@ LoadCompetitionPresentationScreen:
     jmp ShowScreen
 
 StartCompetitionScreen:
+    ; Mute song
     lda #$00
     sta $4015
+
+    ; Load nametable
     jsr ClearScreenAndSprites
     jsr HideEverything
     jsr WaitForNMI
@@ -168,12 +171,19 @@ StartCompetitionScreen:
     jsr EnableNMI
     jsr ShowScreen
 
+    ; Wait 2.5 seconds before starting the game
     lda #$00
     sta GameTimer
 -
     lda GameTimer
     cmp #150 ; 2.5 seconds in frame count
     bne -
+    
+    ; Setup competition timer
+    lda #Competition_Time
+    sta Competition_Seconds
+    lda #$00
+    sta Competition_FrameCount
     rts
 
 NoDecreaseLivesInCompetition:
@@ -260,7 +270,7 @@ NewLevelIncrementOC:
     ldx #$04
 +
     stx CurrentLevelHeaderPtr
-    jmp __f213
+    jmp InitGameRound
 
 NewInitPhaseDisplay:
     lda GameMode
@@ -304,6 +314,231 @@ NewInitPhaseDisplayExit:
 InitialTimerData:
     .hex 20 6e 05
     .hex 00 02 C0 05 09
+
+CompetitionUpdate:
+    ; Hijacked
+    jsr __f470
+
+    lda GameMode
+    cmp #GameMode_Competition
+    bne CompetitionUpdateOC
+    
+    ldx Competition_FrameCount
+    inx
+    cpx #60
+    bmi +
+
+    ldx #$00
+    dec Competition_Seconds
+    bne +
+    
+    lda #$00
+    sta GameMode
+    jmp Competition_TimeUp
++
+    stx Competition_FrameCount
+    jmp CompetitionUpdateExit
+    
+CompetitionUpdateOC:
+    lda PhaseFlashTimer
+    beq CompetitionUpdateExit
+    dec PhaseFlashTimer
+    jsr NewInitPhaseDisplay
+
+CompetitionUpdateExit:
+    rts
+
+Competition_TimeUp:
+    ; Mute Sound
+    lda #$00
+    sta $4015
+
+    ; Load nametable
+    jsr ClearScreenAndSprites
+    jsr HideEverything
+    jsr WaitForNMI
+    jsr DisableNMI
+
+    lda #<TimeUpNametablePtr
+    sta LoadPointerLow
+    lda #>TimeUpNametablePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+    jsr EnableNMI
+    jsr ShowScreen
+
+    ; Wait 2 seconds
+    lda #$00
+    sta GameTimer
+-
+    lda GameTimer
+    cmp #120 ; 2 seconds in frame count
+    bne -
+
+    jmp Competition_FinalScoreEnter
+
+FinalState_Wait1 = $00
+FinalState_ShowPlayer1 = $01
+FinalState_Wait2 = $02
+FinalState_ShowPlayer2 = $03
+FinalState_Wait3 = $04
+FinalState_ShowWinner = $05
+FinalState_ReadInput = $06
+
+Competition_FinalScoreEnter:
+    ; Load nametable
+    jsr ClearScreenAndSprites
+    jsr HideEverything
+    jsr WaitForNMI
+    jsr DisableNMI
+
+    ldx #48
+    ldy #0
+-
+    lda FinalScoreOAMTable,y
+    sta $0200,y
+    iny
+    dex
+    bne -
+
+    lda #<FinalScoreNametablePtr
+    sta LoadPointerLow
+    lda #>FinalScoreNametablePtr
+    sta LoadPointerHigh
+    jsr LoadNametable
+    jsr EnableNMI
+    jsr ShowScreen
+
+    lda #$00
+    sta Competition_FinalState
+    sta GameTimer
+
+    ; Unmute and play game over jingle
+    lda #$0F
+    sta $4015
+    lda #$01
+    sta CurrentMusic
+    
+Competition_FinalScoreUpdate:
+    jsr WaitForNMI
+
+    lda Competition_FinalState
+    cmp #FinalState_Wait1
+    bne +
+
+    lda GameTimer
+    cmp #120
+    bne Competition_FinalScoreUpdateEnd
+    lda #FinalState_ShowPlayer1
+    sta Competition_FinalState
+
++   cmp #FinalState_ShowPlayer1
+    bne +
+
+    jsr CompetitionFinalScore_ShowPlayer1
+
++   cmp #FinalState_Wait2
+    bne +
+
+    lda GameTimer
+    cmp #120
+    bne Competition_FinalScoreUpdateEnd
+    lda #FinalState_ShowPlayer2
+    sta Competition_FinalState
+
++   cmp #FinalState_ShowPlayer2
+    bne +
+
+    jsr CompetitionFinalScore_ShowPlayer2
+
++   cmp #FinalState_Wait3
+    bne +
+
+    lda GameTimer
+    cmp #190
+    bne Competition_FinalScoreUpdateEnd
+    lda #FinalState_ShowWinner
+    sta Competition_FinalState
+
++   cmp #FinalState_ShowWinner
+    bne +
+
+    jsr CompetitionFinalScore_ShowWinner
+
++   cmp #FinalState_ReadInput
+    bne Competition_FinalScoreUpdateEnd
+
+    jsr ReadInputP1
+    and #(Button_Start|Button_Select)
+    cmp #(Button_Start|Button_Select)
+    beq Competition_FinalScoreExit
+
+Competition_FinalScoreUpdateEnd:
+    jmp Competition_FinalScoreUpdate
+
+Competition_FinalScoreExit:
+    ldx #$FF
+    txs
+    jmp GameInit
+
+CompetitionFinalScore_Wait1:
+    rts
+
+CompetitionFinalScore_ShowPlayer1:
+    lda #<Temp1
+    sta AddToGfxPointerLow
+    ldy #>Temp1
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
+
+    lda #$00
+    sta GameTimer
+    lda #FinalState_Wait2
+    sta Competition_FinalState
+    rts
+
+CompetitionFinalScore_ShowPlayer2:
+    lda #<Temp2
+    sta AddToGfxPointerLow
+    ldy #>Temp2
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
+
+    lda #$00
+    sta GameTimer
+    lda #FinalState_Wait3
+    sta Competition_FinalState
+    rts
+
+Temp1:
+    .hex 21 8C 06
+    .hex 0 0 0 0 0 0
+Temp2:
+    .hex 22 AC 06
+    .hex 0 0 0 0 0 0
+
+CompetitionFinalScore_ShowWinner:
+    lda #<FinalScore_ShowWinnerUpdate
+    sta AddToGfxPointerLow
+    ldy #>FinalScore_ShowWinnerUpdate
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
+
+    lda #<FinalScore_ShowPressUpdate1
+    sta AddToGfxPointerLow
+    ldy #>FinalScore_ShowPressUpdate1
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
+
+    lda #<FinalScore_ShowPressUpdate2
+    sta AddToGfxPointerLow
+    ldy #>FinalScore_ShowPressUpdate2
+    sty AddToGfxPointerHigh
+    jsr AddToGfxBuffer
+
+    lda #FinalState_ReadInput
+    sta Competition_FinalState
+    rts
 
 ; ========
 ; = Data =
@@ -467,9 +702,8 @@ PressStartNametableUpdate:
 StartCompetitionNametablePtr:
     .db <StartCompetitionNametable
     .db >StartCompetitionNametable
-    .hex 0
-    .hex 0
-    
+    .hex 0 0
+
 StartCompetitionNametable:
     ; background palette 0
     .hex 3f 00 04 0f 30 27 2a
@@ -478,6 +712,165 @@ StartCompetitionNametable:
     .db "HAJIME"-$37
     .hex 2C ; !
     .hex 0
+
+TimeUpNametablePtr:
+    .db <TimeUpNametable
+    .db >TimeUpNametable
+    .hex 0 0
+    
+TimeUpNametable:
+     ; background palette 0
+    .hex 3f 00 04 0f 30 27 2a
+
+    .hex 21 AA 0D
+    .db "TEMPS"-$37
+    .hex 24
+    .db "ECOULE"-$37
+    .hex 2C ; !
+
+    ; EOD
+    .hex 0
+
+FinalScoreNametablePtr:
+    .db <FinalScoreNametable
+    .db >FinalScoreNametable
+    .hex 0 0
+
+FinalScoreNametable:
+    ; background palette 0
+    .hex 3f 00 04 0f 30 27 2a
+    ; sprite palettes
+    .hex 3f 10 08
+    .hex 0f 0C 1D 37
+    .hex 0f 13 1D 37
+
+    .hex 20 67 11
+    .db "LES"-$37
+    .hex 24
+    .db "SCORES"-$37
+    .hex 24
+    .db "FINAUX"-$37
+    
+    .hex 20 CB 08
+    .db "JOUEUR"-$37
+    .hex 24
+    .db "1"-"0"
+    
+    .hex 21 EB 08
+    .db "JOUEUR"-$37
+    .hex 24
+    .db "2"-"0"
+
+    ; EOD
+    .hex 0
+
+Joueur1SpriteX1 = 112
+Joueur1SpriteX2 = 120
+Joueur1SpriteY1 = 64
+Joueur1SpriteY2 = 72
+Joueur1SpriteY3 = 80
+
+Joueur2SpriteX1 = 112
+Joueur2SpriteX2 = 120
+Joueur2SpriteY1 = 136
+Joueur2SpriteY2 = 144
+Joueur2SpriteY3 = 152
+
+FinalScoreOAMTable:
+    .db Joueur1SpriteY1
+    .hex 0
+    .hex 0
+    .db Joueur1SpriteX1
+
+    .db Joueur1SpriteY1
+    .hex 0B
+    .hex 0
+    .db Joueur1SpriteX2
+
+    .db Joueur1SpriteY2
+    .hex 38
+    .hex 0
+    .db Joueur1SpriteX1
+
+    .db Joueur1SpriteY2
+    .hex 39
+    .hex 0
+    .db Joueur1SpriteX2
+
+    .db Joueur1SpriteY3
+    .hex 27
+    .hex 0
+    .db Joueur1SpriteX1
+
+    .db Joueur1SpriteY3
+    .hex 05
+    .hex 0
+    .db Joueur1SpriteX2
+
+    ; -----------------
+    .db Joueur2SpriteY1
+    .hex 0
+    .hex 1
+    .db Joueur2SpriteX1
+
+    .db Joueur2SpriteY1
+    .hex 0B
+    .hex 1
+    .db Joueur2SpriteX2
+
+    .db Joueur2SpriteY2
+    .hex 38
+    .hex 1
+    .db Joueur2SpriteX1
+
+    .db Joueur2SpriteY2
+    .hex 39
+    .hex 1
+    .db Joueur2SpriteX2
+
+    .db Joueur2SpriteY3
+    .hex 27
+    .hex 1
+    .db Joueur2SpriteX1
+
+    .db Joueur2SpriteY3
+    .hex 05
+    .hex 1
+    .db Joueur2SpriteX2
+
+FinalScore_ShowWinnerUpdate:
+    .hex 23 04 19
+    .db "LE"-$37
+    .hex 24
+    .db "GAGNANT"-$37
+    .hex 24
+    .db "EST"-$37
+    .hex C0 ; :
+    .hex 24
+    .db "JOUEUR"-$37
+    .hex 24
+    .db "1"-"0"
+    .hex 2c ; !
+
+FinalScore_ShowPressUpdate1:
+    .hex 23 44 18
+    .db "APPUYEZ"-$37
+    .hex 24
+    .db "SUR"-$37
+    .hex 24
+    .db "START"-$37
+    .hex c2 ; +
+    .db "SELECT"-$37
+    
+FinalScore_ShowPressUpdate2:
+    .hex 23 65 17
+    .db "POUR"-$37
+    .hex 24
+    .db "RETOURNER"-$37
+    .hex 24
+    .db "AU"-$37
+    .hex 24
+    .db "DEBUT"-$37
 
 NewTitlescreenPtr:
     .db <NewTitlescreen
