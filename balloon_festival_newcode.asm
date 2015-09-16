@@ -549,6 +549,45 @@ CompetitionFinalScore_ShowWinner:
     sty AddToGfxPointerHigh
     jsr AddToGfxBuffer
 
+    ldx #$04
+-
+    lda $03,x
+    cmp $08,x
+    beq +
+    bcc IsPlayer2Winner
+    bcs IsPlayer1Winner
++
+    dex
+    bpl -
+    
+    ldx GfxBufferIndex
+    ldy #9
+-
+    lda FinalScore_Tie,y
+    sta $0300,x
+    
+    dex
+    dey
+    bpl -
+
+    bmi +
+    
+IsPlayer1Winner:
+    ldx GfxBufferIndex
+    dex
+    dex
+    lda #$01
+    sta $0300,x
+    bne +
+
+IsPlayer2Winner:
+    ldx GfxBufferIndex
+    dex
+    dex
+    lda #$02
+    sta $0300,x
+
++
     lda #<FinalScore_ShowPressUpdate1
     sta AddToGfxPointerLow
     ldy #>FinalScore_ShowPressUpdate1
@@ -874,8 +913,13 @@ FinalScore_ShowWinnerUpdate:
     .hex 24
     .db "JOUEUR"-$37
     .hex 24
-    .db "1"-"0"
+    .db "0"-"0"
     .hex 2c ; !
+
+FinalScore_Tie:
+    .db "MATCH"-$37
+    .hex 24
+    .db "NUL"-$37
 
 FinalScore_ShowPressUpdate1:
     .hex 23 44 18

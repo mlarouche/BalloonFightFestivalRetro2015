@@ -279,7 +279,8 @@ __c11e:     lda $0057,y                              ; $c11e: b9 57 00
             rts                                      ; $c12c: 60        
 
 ;-------------------------------------------------------------------------------
-AddToGfxBuffer_Default:     lda #$57                                 ; $c12d: a9 57     
+AddToGfxBuffer_Default:
+            lda #$57                                 ; $c12d: a9 57     
             ldy #$00                                 ; $c12f: a0 00     
 AddToGfxBuffer:
             sta AddToGfxPointerLow                                  ; $c131: 85 21     
