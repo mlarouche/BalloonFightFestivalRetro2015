@@ -304,7 +304,7 @@ NewInitPhaseDisplayOC:
     lda $43
     sta $61
 NewInitPhaseDisplayExit:
-    jmp __c12d
+    jmp AddToGfxBuffer_Default
 
 ++
     lda #$00
@@ -485,11 +485,23 @@ CompetitionFinalScore_Wait1:
     rts
 
 CompetitionFinalScore_ShowPlayer1:
-    lda #<Temp1
-    sta AddToGfxPointerLow
-    ldy #>Temp1
-    sty AddToGfxPointerHigh
-    jsr AddToGfxBuffer
+    ldx #$08
+-
+    lda FinalScore_Player1, x
+    sta $57,x
+    dex
+    bpl -
+    
+    ldx #$04
+    ldy #$00
+-
+    lda $03,x
+    sta $5A,y
+    iny
+    dex
+    bpl -
+    
+    jsr AddToGfxBuffer_Default
 
     lda #$00
     sta GameTimer
@@ -498,11 +510,23 @@ CompetitionFinalScore_ShowPlayer1:
     rts
 
 CompetitionFinalScore_ShowPlayer2:
-    lda #<Temp2
-    sta AddToGfxPointerLow
-    ldy #>Temp2
-    sty AddToGfxPointerHigh
-    jsr AddToGfxBuffer
+    ldx #$08
+-
+    lda FinalScore_Player2, x
+    sta $57,x
+    dex
+    bpl -
+    
+    ldx #$04
+    ldy #$00
+-
+    lda $08,x
+    sta $5A,y
+    iny
+    dex
+    bpl -
+    
+    jsr AddToGfxBuffer_Default
 
     lda #$00
     sta GameTimer
@@ -510,10 +534,11 @@ CompetitionFinalScore_ShowPlayer2:
     sta Competition_FinalState
     rts
 
-Temp1:
+FinalScore_Player1:
     .hex 21 8C 06
     .hex 0 0 0 0 0 0
-Temp2:
+
+FinalScore_Player2:
     .hex 22 AC 06
     .hex 0 0 0 0 0 0
 

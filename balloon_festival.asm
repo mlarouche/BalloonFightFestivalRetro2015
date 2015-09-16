@@ -30,6 +30,7 @@ GameMode             = $3f
 NumberOfPlayers      = $40
 Player1Lives         = $41
 Player2Lives         = $42
+UpdateHUDScore       = $46
 BalloonTripRankUnitDigit = $49
 BalloonTripRankTenDigit = $4a
 PpuAddressHigh = $50
@@ -77,7 +78,7 @@ GameMode_Competition = $03
 Competition_FrameCount = $0100
 Competition_Seconds = $0101
 Competition_FinalState = $0102
-Competition_Time = 5
+Competition_Time = 15
 
 ;-------------------------------------------------------------------------------
 ; iNES Header
@@ -147,7 +148,7 @@ __c037:     sta $00,x                                ; $c037: 95 00
 __c043:     lda #$32                                 ; $c043: a9 32     
             jsr __d6de                               ; $c045: 20 de d6  
             lda #$00                                 ; $c048: a9 00     
-            sta $46                                  ; $c04a: 85 46     
+            sta UpdateHUDScore                                  ; $c04a: 85 46     
             jsr __c579                               ; $c04c: 20 79 c5  
             dec $15                                  ; $c04f: c6 15     
             bne __c043                               ; $c051: d0 f0     
@@ -198,7 +199,7 @@ nmi:        pha                                      ; $c094: 48
             beq __c0ac                               ; $c0a7: f0 03     
             jsr CallUpdateGfx                               ; $c0a9: 20 7c c1  
 __c0ac:     jsr __d60d                               ; $c0ac: 20 0d d6  
-            jsr __d798                               ; $c0af: 20 98 d7  
+            jsr HUDDisplay                               ; $c0af: 20 98 d7  
             inc GameTimer                            ; $c0b2: e6 19     
             lda #$20                                 ; $c0b4: a9 20     
             sta $2006                                ; $c0b6: 8d 06 20  
@@ -278,7 +279,7 @@ __c11e:     lda $0057,y                              ; $c11e: b9 57 00
             rts                                      ; $c12c: 60        
 
 ;-------------------------------------------------------------------------------
-__c12d:     lda #$57                                 ; $c12d: a9 57     
+AddToGfxBuffer_Default:     lda #$57                                 ; $c12d: a9 57     
             ldy #$00                                 ; $c12f: a0 00     
 AddToGfxBuffer:
             sta AddToGfxPointerLow                                  ; $c131: 85 21     
@@ -2054,7 +2055,7 @@ __cf51:     lda $055d,x                              ; $cf51: bd 5d 05
             bne __cf34                               ; $cf5b: d0 d7     
             jsr ClearScreenAndSprites                               ; $cf5d: 20 46 d2  
             ldx #$02                                 ; $cf60: a2 02     
-            stx $46                                  ; $cf62: 86 46     
+            stx UpdateHUDScore                                  ; $cf62: 86 46     
             jsr __f45e                               ; $cf64: 20 5e f4  
             lda #$2b                                 ; $cf67: a9 2b     
             ldy #$d1                                 ; $cf69: a0 d1     
@@ -2165,7 +2166,7 @@ __d04f:     lda __d184,x                             ; $d04f: bd 84 d1
             sta $68                                  ; $d05a: 85 68     
             lda BonusPhaseSuperBonus2                ; $d05c: ad 5c 05  
             sta $69                                  ; $d05f: 85 69     
-            jsr __c12d                               ; $d061: 20 2d c1  
+            jsr AddToGfxBuffer_Default                               ; $d061: 20 2d c1  
             lda #$10                                 ; $d064: a9 10     
             sta CurrentMusic                         ; $d066: 85 f2     
 __d068:     ldx #$78                                 ; $d068: a2 78     
@@ -2175,7 +2176,7 @@ __d070:     lda #$00                                 ; $d070: a9 00
             sta $3e                                  ; $d072: 85 3e     
             ldx #$04                                 ; $d074: a2 04     
             jsr __d213                               ; $d076: 20 13 d2  
-            jsr __c12d                               ; $d079: 20 2d c1  
+            jsr AddToGfxBuffer_Default                               ; $d079: 20 2d c1  
             lda NumberOfPlayers                      ; $d07c: a5 40     
             beq __d08e                               ; $d07e: f0 0e     
             inc $3e                                  ; $d080: e6 3e     
@@ -2310,7 +2311,7 @@ __d1a2:     lda __d13e,x                             ; $d1a2: bd 3e d1
             ldx #$12                                 ; $d1b2: a2 12     
             ldy Player2BonusBalloon                  ; $d1b4: ac ce 05  
             jsr __d1dc                               ; $d1b7: 20 dc d1  
-            jsr __c12d                               ; $d1ba: 20 2d c1  
+            jsr AddToGfxBuffer_Default                               ; $d1ba: 20 2d c1  
             lda NumberOfPlayers                      ; $d1bd: a5 40     
             bne __d1c2                               ; $d1bf: d0 01     
             rts                                      ; $d1c1: 60        
@@ -2628,7 +2629,7 @@ __d404:     lda __d45a,y                             ; $d404: b9 5a d4
             dey                                      ; $d409: 88        
             dex                                      ; $d40a: ca        
             bpl __d404                               ; $d40b: 10 f7     
-__d40d:     jmp __c12d                               ; $d40d: 4c 2d c1  
+__d40d:     jmp AddToGfxBuffer_Default                               ; $d40d: 4c 2d c1  
 
 ;-------------------------------------------------------------------------------
 __d410:     ldx BonusPhaseIntensityLevel             ; $d410: ae 58 05  
@@ -3052,7 +3053,7 @@ __d767:     lda (AddToGfxPointerLow),y                              ; $d767: b1 
             sta $000d,y                              ; $d769: 99 0d 00  
             dey                                      ; $d76c: 88        
             bpl __d767                               ; $d76d: 10 f8     
-            inc $46                                  ; $d76f: e6 46     
+            inc UpdateHUDScore                                  ; $d76f: e6 46     
             lda IsBalloonTrip                                  ; $d771: a5 16     
             beq __d778                               ; $d773: f0 03     
             jsr __c539                               ; $d775: 20 39 c5  
@@ -3086,14 +3087,16 @@ __d794:     sec                                      ; $d794: 38
             rts                                      ; $d797: 60        
 
 ;-------------------------------------------------------------------------------
-__d798:     ldy $46                                  ; $d798: a4 46     
+HUDDisplay:
+            ldy UpdateHUDScore                                  ; $d798: a4 46     
             dey                                      ; $d79a: 88        
-            beq __d7a0                               ; $d79b: f0 03     
+            beq HUDScoreDisplay                               ; $d79b: f0 03     
             bpl __d805                               ; $d79d: 10 66     
             rts                                      ; $d79f: 60        
 
 ;-------------------------------------------------------------------------------
-__d7a0:     lda #$20                                 ; $d7a0: a9 20     
+HUDScoreDisplay:
+            lda #$20                                 ; $d7a0: a9 20     
             sta $2006                                ; $d7a2: 8d 06 20  
             lda #$43                                 ; $d7a5: a9 43     
             sta $2006                                ; $d7a7: 8d 06 20  
@@ -3136,14 +3139,14 @@ __d7f5:     lda $08,x                                ; $d7f5: b5 08
             bpl __d7f5                               ; $d7fb: 10 f8     
             lda #$00                                 ; $d7fd: a9 00     
             sta $2007                                ; $d7ff: 8d 07 20  
-__d802:     dec $46                                  ; $d802: c6 46     
+__d802:     dec UpdateHUDScore                                  ; $d802: c6 46     
             rts                                      ; $d804: 60        
 
 ;-------------------------------------------------------------------------------
 __d805:
     jsr NewDisplayLives
     rts
-            ;dec $46                                  ; $d805: c6 46     
+            ;dec UpdateHUDScore                                  ; $d805: c6 46     
             ;lda #$20                                 ; $d807: a9 20     
             sta $2006                                ; $d809: 8d 06 20  
             lda #$62                                 ; $d80c: a9 62     
@@ -3195,7 +3198,7 @@ __d856:     lda __d86c,y                             ; $d856: b9 6c d8
             sta $2007                                ; $d861: 8d 07 20  
             lda BalloonTripRankUnitDigit             ; $d864: a5 49     
             sta $2007                                ; $d866: 8d 07 20  
-            dec $46                                  ; $d869: c6 46     
+            dec UpdateHUDScore                                  ; $d869: c6 46     
             rts                                      ; $d86b: 60        
 
 ;-------------------------------------------------------------------------------
@@ -6120,7 +6123,7 @@ __f3d4:     lda __f3f5,x                             ; $f3d4: bd f5 f3
             sta $60                                  ; $f3e5: 85 60     
             lda $43                                  ; $f3e7: a5 43     
             sta $61                                  ; $f3e9: 85 61     
-            jmp __c12d                               ; $f3eb: 4c 2d c1  
+            jmp AddToGfxBuffer_Default                               ; $f3eb: 4c 2d c1  
 
 ;-------------------------------------------------------------------------------
 __f3ee:     lda #$00                                 ; $f3ee: a9 00     
@@ -6155,7 +6158,7 @@ __f41e:     lda #$24                                 ; $f41e: a9 24
             ldx #$02                                 ; $f42d: a2 02     
 __f42f:     lda __f43f,x                             ; $f42f: bd 3f f4  
             sta $58                                  ; $f432: 85 58     
-            jsr __c12d                               ; $f434: 20 2d c1  
+            jsr AddToGfxBuffer_Default                               ; $f434: 20 2d c1  
             dex                                      ; $f437: ca        
             bpl __f42f                               ; $f438: 10 f5     
             rts                                      ; $f43a: 60        
@@ -6225,7 +6228,7 @@ __f4a5:     lda #$01                                 ; $f4a5: a9 01
             stx $0459                                ; $f4b8: 8e 59 04  
             stx $90                                  ; $f4bb: 86 90     
             inx                                      ; $f4bd: e8        
-            stx $46                                  ; $f4be: 86 46     
+            stx UpdateHUDScore                                  ; $f4be: 86 46     
             lda #$40                                 ; $f4c0: a9 40     
             sta FishX                                ; $f4c2: 85 99     
             rts                                      ; $f4c4: 60        
