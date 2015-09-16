@@ -272,48 +272,7 @@ NewLevelIncrementOC:
     stx CurrentLevelHeaderPtr
     jmp InitGameRound
 
-NewInitPhaseDisplay:
-    lda GameMode
-    cmp #GameMode_Competition
-    bne NewInitPhaseDisplayOC
-    
-    ldx #$08
--
-    lda InitialTimerData,x
-    sta $57,x
-    dex
-    bpl -
-    jmp NewInitPhaseDisplayExit
 
-NewInitPhaseDisplayOC:
-    lda $3d
-    and #$20
-    beq ++
-
-    ldx #$0a
--
-    lda __f3f5,x
-    sta $57,x
-    dex
-    bpl -
-    ldy #$0a
-    lda CurrentPhaseCount
-    sta $43
-    jsr __d77c
-    sta $60
-    lda $43
-    sta $61
-NewInitPhaseDisplayExit:
-    jmp AddToGfxBuffer_Default
-
-++
-    lda #$00
-    ldy #$f4
-    jmp AddToGfxBuffer
-
-InitialTimerData:
-    .hex 20 6e 05
-    .hex 00 02 C0 05 09
 
 CompetitionUpdate:
     ; Hijacked
@@ -337,17 +296,56 @@ CompetitionUpdate:
     jmp Competition_TimeUp
 +
     stx Competition_FrameCount
+    
+    jsr ShowCompetitionTimer
     jmp CompetitionUpdateExit
     
 CompetitionUpdateOC:
     lda PhaseFlashTimer
     beq CompetitionUpdateExit
     dec PhaseFlashTimer
-    jsr NewInitPhaseDisplay
+    jsr InitPhaseDisplay
 
 CompetitionUpdateExit:
     rts
 
+ShowCompetitionTimer:
+    ldx #5
+-
+    lda InitialTimerData,x
+    sta $57,x
+    dex
+    bpl -
+
+    ldy #60
+    lda Competition_Seconds
+    sta $43
+    jsr DoDivision
+    sta Competition_MinutePart
+    lda $43
+    sta Competition_SecondPart
+
+    ldy #10
+    lda Competition_MinutePart
+    sta $43
+    jsr DoDivision
+    sta $5A
+    lda $43
+    sta $5B
+
+    lda Competition_SecondPart
+    sta $43
+    jsr DoDivision
+    sta $5D
+    lda $43
+    sta $5E
+
+    jmp AddToGfxBuffer_Default
+
+InitialTimerData:
+    .hex 20 6e 05
+    .hex 00 00 C0
+    
 Competition_TimeUp:
     ; Mute Sound
     lda #$00

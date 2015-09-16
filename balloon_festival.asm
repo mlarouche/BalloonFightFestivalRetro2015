@@ -78,7 +78,11 @@ GameMode_Competition = $03
 Competition_FrameCount = $0100
 Competition_Seconds = $0101
 Competition_FinalState = $0102
-Competition_Time = 15
+
+Competition_SecondPart = $0103
+Competition_MinutePart = $0104
+
+Competition_Time = 180
 
 ;-------------------------------------------------------------------------------
 ; iNES Header
@@ -825,7 +829,7 @@ __c563:     inc BytesLeftToLoad                      ; $c563: e6 12
             pha                                      ; $c567: 48        
             sta $43                                  ; $c568: 85 43     
             ldy #$0a                                 ; $c56a: a0 0a     
-            jsr __d77c                               ; $c56c: 20 7c d7  
+            jsr DoDivision                               ; $c56c: 20 7c d7  
             sta BalloonTripRankTenDigit              ; $c56f: 85 4a     
             lda $43                                  ; $c571: a5 43     
             sta BalloonTripRankUnitDigit             ; $c573: 85 49     
@@ -2987,12 +2991,12 @@ __d6e5:     ldx $3e                                  ; $d6e5: a6 3e
             lda Player1Lives,x                       ; $d6eb: b5 41     
             bmi __d6e4                               ; $d6ed: 30 f5     
             ldy #$64                                 ; $d6ef: a0 64     
-            jsr __d77c                               ; $d6f1: 20 7c d7  
+            jsr DoDivision                               ; $d6f1: 20 7c d7  
             clc                                      ; $d6f4: 18        
             adc $48                                  ; $d6f5: 65 48     
             sta $45                                  ; $d6f7: 85 45     
             ldy #$0a                                 ; $d6f9: a0 0a     
-            jsr __d77c                               ; $d6fb: 20 7c d7  
+            jsr DoDivision                               ; $d6fb: 20 7c d7  
             sta $44                                  ; $d6fe: 85 44     
             ldx GameMode                             ; $d700: a6 3f     
             lda NewD779,x                             ; $d702: bd 79 d7  
@@ -3064,7 +3068,8 @@ __d778:     rts                                      ; $d778: 60
 __d779:     .hex 29 2e 33                            ; $d779: 29 2e 33      Data
 
 ;-------------------------------------------------------------------------------
-__d77c:     sty BytesLeftToLoad                      ; $d77c: 84 12     
+DoDivision:
+            sty BytesLeftToLoad                      ; $d77c: 84 12     
             ldx #$ff                                 ; $d77e: a2 ff     
             lda $43                                  ; $d780: a5 43     
 __d782:     sec                                      ; $d782: 38        
@@ -6120,7 +6125,7 @@ __f3d4:     lda __f3f5,x                             ; $f3d4: bd f5 f3
             ldy #$0a                                 ; $f3dc: a0 0a     
             lda CurrentPhaseCount                    ; $f3de: a5 3c     
             sta $43                                  ; $f3e0: 85 43     
-            jsr __d77c                               ; $f3e2: 20 7c d7  
+            jsr DoDivision                               ; $f3e2: 20 7c d7  
             sta $60                                  ; $f3e5: 85 60     
             lda $43                                  ; $f3e7: a5 43     
             sta $61                                  ; $f3e9: 85 61     
