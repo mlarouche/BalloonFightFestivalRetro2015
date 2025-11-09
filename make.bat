@@ -13,7 +13,7 @@ if not exist %HACK_ROM_NAME%.chr (
 
     REM Apply changed graphics via the IPS
     copy %ORIGINAL_ROM_NAME%.chr %HACK_ROM_NAME%.chr
-    %TOOLS_BIN%\ucon64.exe -i balloon_festival_chr.ips %HACK_ROM_NAME%.chr
+    %TOOLS_BIN%\ucon64.exe -i %HACK_ROM_NAME%.chr balloon_festival_chr.ips
 )
 
 REM Delete hack rom
